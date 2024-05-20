@@ -1,9 +1,9 @@
 /**
- * Describes the general behavior of nodes with attached actions.
+ * Describes the general behavior of nodes with attached *readonly* actions.
  *
  * @typeParam Node - Type of the contained node.
  */
-export interface NodeWithActionsModel<Node> {
+export interface NodeWithReadonlyActionsModel<Node> {
   /**
    * Contains node.
    */
@@ -18,42 +18,6 @@ export interface NodeWithActionsModel<Node> {
    * Contains children of the node.
    */
   children: ReadonlySet<Node>;
-
-  /**
-   * Creates specified edge (`node`, `head`).
-   *
-   * @param head - Node to be head of new edge.
-   *
-   * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
-   */
-  connectTo: (head: Node) => boolean;
-
-  /**
-   * Creates specified edge (`node`, `head`).
-   *
-   * @param tail - Node to be tail of new edge.
-   *
-   * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
-   */
-  connectFrom: (tail: Node) => boolean;
-
-  /**
-   * Deletes specified edge (`node`, `head`).
-   *
-   * @param head - Node to be head of removed edge.
-   *
-   * @returns `true` if the edge contained in the DAG, `false` otherwise.
-   */
-  disconnectTo: (head: Node) => boolean;
-
-  /**
-   * Deletes specified edge (`tail`, `node`).
-   *
-   * @param tail - Node to be tail of removed edge.
-   *
-   * @returns `true` if the edge contained in the DAG, `false` otherwise.
-   */
-  disconnectFrom: (tail: Node) => boolean;
 
   /**
    * Searches ancestors of the node that are no deeper than `maxDepth`.
@@ -110,4 +74,48 @@ export interface NodeWithActionsModel<Node> {
    * @returns `true` if the node is the descendant of the `ancestor`, `false` otherwise
    */
   isDescendantOf: (ancestor: Node, maxDepth: number) => boolean;
+}
+
+/**
+ * Describes the general behavior of nodes with attached actions.
+ *
+ * @typeParam Node - Type of the contained node.
+ */
+export interface NodeWithActionsModel<Node>
+  extends NodeWithReadonlyActionsModel<Node> {
+  /**
+   * Creates specified edge (`node`, `head`).
+   *
+   * @param head - Node to be head of new edge.
+   *
+   * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
+   */
+  connectTo: (head: Node) => boolean;
+
+  /**
+   * Creates specified edge (`node`, `head`).
+   *
+   * @param tail - Node to be tail of new edge.
+   *
+   * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
+   */
+  connectFrom: (tail: Node) => boolean;
+
+  /**
+   * Deletes specified edge (`node`, `head`).
+   *
+   * @param head - Node to be head of removed edge.
+   *
+   * @returns `true` if the edge contained in the DAG, `false` otherwise.
+   */
+  disconnectTo: (head: Node) => boolean;
+
+  /**
+   * Deletes specified edge (`tail`, `node`).
+   *
+   * @param tail - Node to be tail of removed edge.
+   *
+   * @returns `true` if the edge contained in the DAG, `false` otherwise.
+   */
+  disconnectFrom: (tail: Node) => boolean;
 }
