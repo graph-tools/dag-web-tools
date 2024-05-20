@@ -1,74 +1,4 @@
-import { NodeWithActionsModel } from './node';
-
-/**
- * Contains strategies for injection code at iteration time.
- */
-export const enum IteratorInjectOn {
-  /**
-   * Iterator will provide control when entering the node.
-   */
-  ENTER = 'enter',
-  /**
-   * Iterator will provide control when leaving the node.
-   */
-  LEAVE = 'leave',
-  /**
-   * Iterator will provide control both when entering and leaving the node.
-   */
-  ALL = 'all',
-}
-
-export type BreadthIteratorOptions<Node> = {
-  /**
-   * Defines depth of the iteration tree.
-   */
-  depth: number;
-
-  /**
-   * Defines nodes that will be ignored during iteration.
-   */
-  ignore: ReadonlySet<Node>;
-};
-
-export type BreadthIteratorDetails = {
-  /**
-   * Contains depth of the node.
-   */
-  depth: number;
-};
-
-export type BreadthIteratorItem<Node> = [Node, BreadthIteratorDetails];
-
-export type DepthIteratorOptions<Node> = {
-  /**
-   * Defines depth of the iteration tree.
-   */
-  depth: number;
-
-  /**
-   * Defines when the iterator should provide control.
-   */
-  injectOn: IteratorInjectOn;
-
-  /**
-   * Defines nodes that will be ignored during iteration.
-   */
-  ignore: ReadonlySet<Node>;
-};
-
-export type DepthIteratorDetails = {
-  /**
-   * Contains depth of the node.
-   */
-  depth: number;
-
-  /**
-   * Contains injection time.
-   */
-  injectOn: IteratorInjectOn;
-};
-
-export type DepthIteratorItem<Node> = [Node, DepthIteratorDetails];
+import { NodeWithActionsModel, NodeWithReadonlyActionsModel } from './node';
 
 /**
  * A collection consisting of all supported graph size values.
@@ -95,92 +25,21 @@ export type DirectedAsyclicGraphSize = {
   width: number;
 };
 
-export interface DirectedAcyclicGraphIterators<Node> {
+export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
   /**
-   * Generator of depth first iterator.
-   *
-   * @param root - Node to be root of iteration tree.
-   * @param options - Values specifying the iterator behavior.
-   *
-   * @returns Depth first iterator with specified behavior.
+   * Topological order iterator.
    */
-  depth: (
-    root: Node,
-    options: DepthIteratorOptions<Node>,
-  ) => Iterator<DepthIteratorItem<Node>, undefined>;
+  [Symbol.iterator]: () => Iterator<Node>;
 
-  /**
-   * Generator of breadth first iterator.
-   *
-   * @param root - Node to be root of iteration tree.
-   * @param options - Values specifying the iterator behavior.
-   *
-   * @returns Breadth first iterator with specified behavior.
-   */
-  breadth: (
-    root: Node,
-    options: BreadthIteratorOptions<Node>,
-  ) => Iterator<BreadthIteratorItem<Node>, undefined>;
-}
-
-/**
- * Describes the general behavior of directed acyclic graph (DAG).
- *
- * @typeParam Node - Type of the contained nodes.
- */
-export interface DirectedAcyclicGraph<Node> extends Iterable<Node> {
   /**
    * Contains structire sizes.
    */
   size: Readonly<DirectedAsyclicGraphSize>;
 
   /**
-   * Contains structure iterators.
+   * Contains all nodes of the DAG.
    */
-  iterator: Readonly<DirectedAcyclicGraphIterators<Node>>;
-
-  /**
-   * Deletes all nodes and edges.
-   */
-  clear: () => void;
-
-  /**
-   * Adds the specified `node` to the DAG if it is not contained.
-   *
-   * @param node - Node to be added.
-   *
-   * @returns `true` if the `node` *did not* contain in the DAG, `false` otherwise.
-   */
-  add: (node: Node) => boolean;
-
-  /**
-   * Deletes the specified `node` and all edges connected with it.
-   *
-   * @param node - Node to be deleted.
-   *
-   * @returns `true` if the `node` contained in the DAG, `false` otherwise.
-   */
-  delete: (node: Node) => boolean;
-
-  /**
-   * Creates specified edge (`tail`, `head`).
-   *
-   * @param tail - Node to be tail of new edge.
-   * @param head - Node to be head of new edge.
-   *
-   * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
-   */
-  connect: (tail: Node, heads: Node) => boolean;
-
-  /**
-   * Deletes specified edge (`tail`, `head`).
-   *
-   * @param tail - Node to be tail of removed edge.
-    @param head - Node to be head of removed edge.
-   *
-   * @returns `true` if the edge contained in the DAG, `false` otherwise.
-   */
-  disconnect: (tail: Node, head: Node) => boolean;
+  nodes: Iterable<Node>;
 
   /**
    * Checks if the specified `node` is contained in the DAG.
@@ -255,16 +114,16 @@ export interface DirectedAcyclicGraph<Node> extends Iterable<Node> {
    *
    * @param node - Node for which actions are attached.
    *
-   * @returns Node with attached actions.
+   * @returns Node with attached readonly actions.
    */
-  node: (node: Node) => NodeWithActionsModel<Node> | undefined;
+  node: (node: Node) => NodeWithReadonlyActionsModel<Node>;
 
   /**
    * Creates a new DAG with reversed edges.
    *
    * @returns Reverse of the DAG.
    */
-  reversed: () => DirectedAcyclicGraph<Node>;
+  reversed: () => ReadonlyDirectedAcyclicGraph<Node>;
 
   /**
    * Sorts nodes in topological order and returns result.
@@ -272,4 +131,64 @@ export interface DirectedAcyclicGraph<Node> extends Iterable<Node> {
    * @returns Nodes sorted in topological order.
    */
   sorted: () => Node[];
+}
+
+/**
+ * Describes the general behavior of directed acyclic graph (DAG).
+ *
+ * @typeParam Node - Type of the contained nodes.
+ */
+export interface DirectedAcyclicGraph<Node>
+  extends ReadonlyDirectedAcyclicGraph<Node> {
+  /**
+   * Deletes all nodes and edges.
+   */
+  clear: () => void;
+
+  /**
+   * Adds the specified `node` to the DAG if it is not contained.
+   *
+   * @param node - Node to be added.
+   *
+   * @returns `true` if the `node` *did not* contain in the DAG, `false` otherwise.
+   */
+  add: (node: Node) => boolean;
+
+  /**
+   * Deletes the specified `node` and all edges connected with it.
+   *
+   * @param node - Node to be deleted.
+   *
+   * @returns `true` if the `node` contained in the DAG, `false` otherwise.
+   */
+  delete: (node: Node) => boolean;
+
+  /**
+   * Creates specified edge (`tail`, `head`).
+   *
+   * @param tail - Node to be tail of new edge.
+   * @param head - Node to be head of new edge.
+   *
+   * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
+   */
+  connect: (tail: Node, heads: Node) => boolean;
+
+  /**
+   * Deletes specified edge (`tail`, `head`).
+   *
+   * @param tail - Node to be tail of removed edge.
+    @param head - Node to be head of removed edge.
+   *
+   * @returns `true` if the edge contained in the DAG, `false` otherwise.
+   */
+  disconnect: (tail: Node, head: Node) => boolean;
+
+  /**
+   * Attaches shortcuts of DAG's actions for specified node.
+   *
+   * @param node - Node for which actions are attached.
+   *
+   * @returns Node with attached actions.
+   */
+  node: (node: Node) => NodeWithActionsModel<Node>;
 }
