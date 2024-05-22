@@ -1,12 +1,15 @@
 {
   "type": "module",
-  "name": "Dag Web Tools",
+  "name": "dag-web-tools",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "demo": "vite",
-    "unit": "vitest",
+    "eslint-check": "eslint 'src/**/*.[ts][tsx]'",
+    "stylelint-check": "stylelint --allow-empty-input 'demo/**/*.css'",
+    "prettier-check": "prettier --check src",
+    "unit": "vitest --passWithNoTests",
     "build": "vite build"
   },
   "author": "",
