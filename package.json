@@ -2,8 +2,18 @@
   "type": "module",
   "name": "@graph-toolkit/dag",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.ts",
+  "description": "Typescript toolkit for directed acyclic graph",
+  "module": "dist/index.es.js",
+  "main": "dist/index.cjs.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs.js",
+      "import": "./dist/index.es.js"
+    },
+    "./dist/*": "./dist/*"
+  },
   "scripts": {
     "demo": "vite",
     "eslint-check": "eslint 'src/**/*.[ts][tsx]'",

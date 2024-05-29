@@ -3,19 +3,23 @@ import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   root: './',
-  plugins: [dts()],
+  plugins: [dts({ exclude: './src/test/**' })],
   publicDir: './public',
   server: {
     port: 3000,
     open: '/demo',
   },
+  esbuild: {
+    charset: 'utf8',
+  },
   build: {
     target: 'es6',
-    outDir: './dist/lib',
+    reportCompressedSize: true,
+    outDir: './dist',
     lib: {
       entry: './src/index.ts',
       formats: ['es', 'cjs'],
-      fileName: (format) => `@graph-toolkit/dag.${format}.js`,
+      fileName: (format) => `index.${format}.js`,
     },
   },
 });
