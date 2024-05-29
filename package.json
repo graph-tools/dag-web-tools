@@ -1,15 +1,15 @@
 {
   "type": "module",
-  "name": "dag-web-tools",
-  "version": "0.0.0",
+  "name": "@graph-toolkit/dag",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "demo": "vite",
     "eslint-check": "eslint 'src/**/*.[ts][tsx]'",
     "stylelint-check": "stylelint --allow-empty-input 'demo/**/*.css'",
     "prettier-check": "prettier --check src",
-    "unit": "vitest --passWithNoTests",
+    "unit": "vitest",
     "build": "vite build"
   },
   "author": "",

@@ -14,9 +14,8 @@ export default defineConfig({
     outDir: './dist/lib',
     lib: {
       entry: './src/index.ts',
-      name: 'dag-web-tools',
       formats: ['es', 'cjs'],
-      fileName: (format) => `dag-web-tools.${format}.js`,
+      fileName: (format) => `@graph-toolkit/dag.${format}.js`,
     },
   },
 });
