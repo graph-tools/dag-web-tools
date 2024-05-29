@@ -1,3 +1,3 @@
-export * from './dag';
-export * from './node';
-export * from './share';
+export * from './DirectedAcyclicGraph';
+export * from './NodeWithActions';
+export * from './Shares';

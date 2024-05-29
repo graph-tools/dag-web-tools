@@ -1,4 +1,7 @@
-import { NodeWithActionsModel, NodeWithReadonlyActionsModel } from './node';
+import {
+  NodeWithActionsModel,
+  NodeWithReadonlyActionsModel,
+} from './NodeWithActions';
 
 /**
  * A collection consisting of all supported graph size values.
@@ -138,7 +141,7 @@ export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
  *
  * @typeParam Node - Type of the contained nodes.
  */
-export interface DirectedAcyclicGraph<Node>
+export interface AbstractDirectedAcyclicGraph<Node>
   extends ReadonlyDirectedAcyclicGraph<Node> {
   /**
    * Deletes all nodes and edges.
