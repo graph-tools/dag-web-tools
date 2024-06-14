@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import DirectedAcyclicGraph from './DirectedAcyclicGraph';
+import { DirectedAcyclicGraph } from './DirectedAcyclicGraph';
 import { AntichainMock, ChainMock, CrownMock, LayeredMock } from './test/mocks';
 import { areSetsEqual, getMockNode, getMockNodes } from './test/utils';
 import { DirectedAcyclicGraphMock } from './test/mocks/DirectedAcyclicGraphMock';
