@@ -30,7 +30,9 @@ export type DirectedAcyclicGraphOptions = {
   edgeAdditionStrategy: EdgeAdditionStrategy;
 };
 
-class DirectedAcyclicGraph<Node> implements AbstractDirectedAcyclicGraph<Node> {
+export class DirectedAcyclicGraph<Node>
+  implements AbstractDirectedAcyclicGraph<Node>
+{
   private _options: DirectedAcyclicGraphOptions;
 
   /**
@@ -507,5 +509,3 @@ class DirectedAcyclicGraph<Node> implements AbstractDirectedAcyclicGraph<Node> {
     return width;
   }
 }
-
-export default DirectedAcyclicGraph;
