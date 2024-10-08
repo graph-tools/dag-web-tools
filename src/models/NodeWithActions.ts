@@ -12,12 +12,12 @@ export interface NodeWithReadonlyActionsModel<Node> {
   /**
    * Contains parents of the node.
    */
-  parents: ReadonlySet<Node>;
+  readonly parents: ReadonlySet<this>;
 
   /**
    * Contains children of the node.
    */
-  children: ReadonlySet<Node>;
+  readonly children: ReadonlySet<this>;
 
   /**
    * Searches ancestors of the node that are no deeper than `maxDepth`.
@@ -26,7 +26,7 @@ export interface NodeWithReadonlyActionsModel<Node> {
    *
    * @returns Ancecestors of the node.
    */
-  ancestors: (maxDepth: number) => ReadonlySet<Node>;
+  ancestors: (maxDepth: number) => ReadonlySet<this>;
 
   /**
    * Searches descendants of the node that are no deeper than `maxDepth`.
@@ -35,7 +35,7 @@ export interface NodeWithReadonlyActionsModel<Node> {
    *
    * @returns Descendants of the node.
    */
-  descendants: (maxDepth: number) => ReadonlySet<Node>;
+  descendants: (maxDepth: number) => ReadonlySet<this>;
 
   /**
    * Checks if the node is the child of `parent`.

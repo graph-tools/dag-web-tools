@@ -5,7 +5,7 @@ import {
   DirectedAsyclicGraphSize,
   ReadonlyDirectedAcyclicGraph,
 } from './models';
-import NodeWithActions from './NodeWithActions';
+import { NodeWithActions } from './NodeWithActions';
 import { ForceMap } from './utils';
 
 function getDefaultNodeSet<Node>() {
