@@ -18,13 +18,13 @@ import { MockNode } from '..';
 export class ChainMock extends DirectedAcyclicGraphMock<MockNode> {
   constructor(size: number) {
     const nodes = getMockNodes(size);
-    const adjacencyLists = new ForceMap<MockNode, MockNode[]>(() => []);
+    const edges = new Set<[MockNode, MockNode]>();
     const ancestors = new ForceMap<MockNode, Set<MockNode>[]>(() => []);
     const descendants = new ForceMap<MockNode, Set<MockNode>[]>(() => []);
 
     nodes.forEach((node, index) => {
       if (index !== 0) {
-        adjacencyLists.forceGet(nodes[index - 1]).push(node);
+        edges.add([nodes[index - 1], node]);
       }
     });
 
@@ -47,6 +47,7 @@ export class ChainMock extends DirectedAcyclicGraphMock<MockNode> {
 
     super({
       nodes: new Set<MockNode>(nodes),
+      edges,
       ancestors,
       descendants,
       size: { nodes: size, edges: size - 1, depth: size - 1, width: 1 },

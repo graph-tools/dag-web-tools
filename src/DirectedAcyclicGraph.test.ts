@@ -4,7 +4,14 @@ import { DirectedAcyclicGraph } from './DirectedAcyclicGraph';
 import { AntichainMock, ChainMock, CrownMock, LayeredMock } from './test/mocks';
 import { areSetsEqual, getMockNode, getMockNodes } from './test/utils';
 import { DirectedAcyclicGraphMock } from './test/mocks/DirectedAcyclicGraphMock';
-import { MockNode } from './test';
+import { MockNode, areMultisetsEqual } from './test';
+
+function edgesEqual(
+  [tailA, headA]: [MockNode, MockNode],
+  [tailB, headB]: [MockNode, MockNode],
+): boolean {
+  return tailA === tailB && headA === headB;
+}
 
 /**
  * Testing is based on three untestable trivial methods `nodes`, `has` and `hasArc`.
@@ -17,6 +24,22 @@ describe(' Directed Acyclic Graph', () => {
     { title: 'layered', mock: new LayeredMock([10, 10, 10, 10, 10]) },
   ];
 
+  describe('edges iterator should work properly', () => {
+    test.each(testCases)('$title', ({ mock }) => {
+      const dag = DirectedAcyclicGraph.from(mock);
+
+      /**
+       * Created DAG should has all and only edges specified by mock.
+       */
+      console.log([...dag.edges].length, [...mock.edges].length);
+      expect(
+        areMultisetsEqual([...dag.edges], [...mock.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
+    });
+  });
+
   describe('constructor from any DAG should work properly', () => {
     test.each(testCases)('$title', ({ mock }) => {
       const dag = DirectedAcyclicGraph.from(mock);
@@ -24,17 +47,16 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Created DAG should has all and only nodes specified by adjacency lists.
        */
-      expect(areSetsEqual(dag.nodes, mock.nodes)).toBeTruthy();
+      expect(areMultisetsEqual([...dag.nodes], [...mock.nodes])).toBeTruthy();
 
       /**
        * Created DAG should has all and only edges specified by adjacency lists.
        */
-      for (const tail of dag.nodes) {
-        const children = mock.childrenOf(tail);
-        for (const head of dag.nodes) {
-          expect(dag.hasEdge(tail, head)).toBe(children.has(head));
-        }
-      }
+      expect(
+        areMultisetsEqual([...dag.edges], [...mock.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
     });
   });
 
@@ -46,16 +68,16 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Created DAG should has all and only nodes specified by source DAG.
        */
-      expect(areSetsEqual(copy.nodes, dag.nodes)).toBeTruthy();
+      expect(areMultisetsEqual([...copy.nodes], [...dag.nodes])).toBeTruthy();
 
       /**
        * Created DAG should has all and only edges specified by source DAG.
        */
-      for (const tail of dag.nodes) {
-        for (const head of dag.nodes) {
-          expect(copy.hasEdge(tail, head)).toBe(dag.hasEdge(tail, head));
-        }
-      }
+      expect(
+        areMultisetsEqual([...copy.edges], [...dag.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
 
       /**
        * Changes should *not* affect source DAG.
@@ -67,12 +89,12 @@ describe(' Directed Acyclic Graph', () => {
       copy.add(head);
       copy.connect(tail, head);
 
-      expect(areSetsEqual(new Set(dag.nodes), mock.nodes)).toBeTruthy();
-      for (const tail of dag.nodes) {
-        for (const head of dag.nodes) {
-          expect(dag.hasEdge(tail, head)).toBe(mock.hasEdge(tail, head));
-        }
-      }
+      expect(areMultisetsEqual([...dag.nodes], [...mock.nodes])).toBeTruthy();
+      expect(
+        areMultisetsEqual([...dag.edges], [...mock.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
     });
   });
 
@@ -224,16 +246,22 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Reverse should has all and only nodes specified by source DAG.
        */
-      expect(areSetsEqual(reversed.nodes, mock.nodes)).toBeTruthy();
+      expect(
+        areMultisetsEqual([...reversed.nodes], [...mock.nodes]),
+      ).toBeTruthy();
 
       /**
        * Reverse should has all and only specified edges in reverse order.
        */
-      for (const tail of dag.nodes) {
-        for (const head of dag.nodes) {
-          expect(reversed.hasEdge(head, tail)).toBe(dag.hasEdge(tail, head));
-        }
-      }
+      expect(
+        areMultisetsEqual(
+          [...reversed.edges],
+          [...mock.edges].map((edge) => edge.reverse() as [MockNode, MockNode]),
+          {
+            equal: edgesEqual,
+          },
+        ),
+      ).toBeTruthy();
     });
   });
 
@@ -245,7 +273,7 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Array should have all and only source's nodes.
        */
-      expect(areSetsEqual(new Set(sorted), dag.nodes)).toBeTruthy();
+      expect(areMultisetsEqual(sorted, [...dag.nodes])).toBeTruthy();
 
       /**
        * Array should be correct topological sort.
@@ -272,7 +300,7 @@ describe(' Directed Acyclic Graph', () => {
        * Only specified node should be added.
        */
       expect(dag.has(node)).toBeTruthy();
-      dag.nodes.forEach((containedNode) => containedNode === node);
+      [...dag.nodes].forEach((containedNode) => containedNode === node);
     });
 
     test('should *not* add a node that already contains', () => {
@@ -290,13 +318,14 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Nothing should change.
        */
-      expect(areSetsEqual(dag.nodes, source.nodes));
+      expect(areMultisetsEqual([...dag.nodes], [...source.nodes]));
     });
   });
 
   describe('connecting nodes should works properly', () => {
     test('should connect unconnected nodes', () => {
-      const dag = new DirectedAcyclicGraph();
+      const dag = new DirectedAcyclicGraph<MockNode>();
+      const copy = DirectedAcyclicGraph.from(dag);
       const tail = getMockNode();
       const head = getMockNode();
 
@@ -308,23 +337,20 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Only specified nodes should be added.
        */
-      expect(areSetsEqual(dag.nodes, new Set([tail, head]))).toBeTruthy();
+      expect(areMultisetsEqual([...dag.nodes], [tail, head])).toBeTruthy();
 
       /**
        * Only specified edge should be created.
        */
-      expect(dag.hasEdge(tail, head)).toBeTruthy();
-      for (const containedHead of dag.nodes) {
-        for (const containedTail of dag.nodes) {
-          if (containedHead !== head || containedTail !== tail) {
-            expect(dag.hasEdge(containedTail, containedHead)).toBeFalsy();
-          }
-        }
-      }
+      expect(
+        areMultisetsEqual([...dag.edges], [[tail, head], ...copy.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
     });
 
     test('should *not* create an edge that already exists', () => {
-      const source = new DirectedAcyclicGraph();
+      const source = new DirectedAcyclicGraph<MockNode>();
       const tail = getMockNode();
       const head = getMockNode();
       source.connect(tail, head);
@@ -339,22 +365,17 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Nothing should change.
        */
-      expect(dag.hasEdge(tail, head)).toBeTruthy();
-      for (const containedHead of dag.nodes) {
-        for (const containedTail of dag.nodes) {
-          if (containedHead !== head || containedTail !== tail) {
-            expect(dag.hasEdge(containedTail, containedHead)).toBe(
-              source.hasEdge(containedTail, containedHead),
-            );
-          }
-        }
-      }
+      expect(
+        areMultisetsEqual([...dag.edges], [...source.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
     });
   });
 
   describe('disconnecting nodes should works properly', () => {
     test('should disconnect connected nodes', () => {
-      const source = new DirectedAcyclicGraph();
+      const source = new DirectedAcyclicGraph<MockNode>();
       const tail = getMockNode();
       const head = getMockNode();
       source.connect(tail, head);
@@ -369,18 +390,17 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Only specified edge should be deleted.
        */
-      expect(dag.hasEdge(tail, head)).toBeFalsy();
-      for (const containedHead of dag.nodes) {
-        for (const containedTail of dag.nodes) {
-          if (containedHead !== head || containedTail !== tail) {
-            expect(dag.hasEdge(containedTail, containedHead)).toBeFalsy();
-          }
-        }
-      }
+      expect(
+        areMultisetsEqual(
+          [...dag.edges],
+          [...source.edges].filter((edge) => !edgesEqual(edge, [tail, head])),
+          { equal: edgesEqual },
+        ),
+      ).toBeTruthy();
     });
 
     test('should *not* delete an edge that does *not* exists', () => {
-      const source = new DirectedAcyclicGraph();
+      const source = new DirectedAcyclicGraph<MockNode>();
       const tail = getMockNode();
       const head = getMockNode();
 
@@ -394,16 +414,11 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Nothing should change.
        */
-      expect(dag.hasEdge(tail, head)).toBeFalsy();
-      for (const containedHead of dag.nodes) {
-        for (const containedTail of dag.nodes) {
-          if (containedHead !== head || containedTail !== tail) {
-            expect(dag.hasEdge(containedTail, containedHead)).toBe(
-              source.hasEdge(containedTail, containedHead),
-            );
-          }
-        }
-      }
+      expect(
+        areMultisetsEqual([...dag.edges], [...source.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
     });
   });
 
@@ -415,8 +430,8 @@ describe(' Directed Acyclic Graph', () => {
       const heads = new Set(getMockNodes(100));
 
       source.add(node);
-      tails.forEach((tail) => source.add(tail));
-      heads.forEach((head) => source.add(head));
+      tails.forEach((tail) => source.connect(tail, node));
+      heads.forEach((head) => source.connect(node, head));
 
       const dag = DirectedAcyclicGraph.from(source);
 
@@ -428,28 +443,25 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Only specified node should be deleted.
        */
-      expect(dag.has(node)).toBeFalsy();
       expect(
-        areSetsEqual(new Set([...dag.nodes, node]), source.nodes),
+        areMultisetsEqual(
+          [...dag.nodes],
+          [...source.nodes].filter((sourceNode) => sourceNode !== node),
+        ),
       ).toBeTruthy();
 
       /**
        * only connected edges should be deleted.
        */
-      for (const containedHead of source.nodes) {
-        for (const containedTail of source.nodes) {
-          if (
-            (containedTail === node && heads.has(containedHead)) ||
-            (tails.has(containedTail) && containedHead === node)
-          ) {
-            expect(dag.hasEdge(containedTail, containedHead)).toBeFalsy();
-          } else {
-            expect(dag.hasEdge(containedTail, containedHead)).toBe(
-              source.hasEdge(containedTail, containedHead),
-            );
-          }
-        }
-      }
+      expect(
+        areMultisetsEqual(
+          [...dag.edges],
+          [...source.edges].filter(
+            ([tail, head]) => tail !== node && head !== node,
+          ),
+          { equal: edgesEqual },
+        ),
+      ).toBeTruthy();
     });
 
     test('should *not* delete non-contained node', () => {
@@ -471,14 +483,12 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Nothing should change.
        */
-      expect(areSetsEqual(dag.nodes, source.nodes)).toBeTruthy();
-      for (const containedHead of source.nodes) {
-        for (const containedTail of source.nodes) {
-          expect(dag.hasEdge(containedTail, containedHead)).toBe(
-            source.hasEdge(containedTail, containedHead),
-          );
-        }
-      }
+      expect(areMultisetsEqual([...dag.nodes], [...source.nodes])).toBeTruthy();
+      expect(
+        areMultisetsEqual([...dag.edges], [...source.edges], {
+          equal: edgesEqual,
+        }),
+      ).toBeTruthy();
     });
   });
 

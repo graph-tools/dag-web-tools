@@ -30,6 +30,38 @@ export type DirectedAcyclicGraphOptions = {
   edgeAdditionStrategy: EdgeAdditionStrategy;
 };
 
+export class DirectedAcyclicGraphEdgeIterator<Node>
+  implements IterableIterator<[Node, Node]>
+{
+  private tail: Node | null = null;
+  private tailIterator: IterableIterator<Node>;
+  private headIterator: IterableIterator<Node>;
+
+  constructor(private dag: ReadonlyDirectedAcyclicGraph<Node>) {
+    this.tailIterator = dag.nodes;
+    this.headIterator = [][Symbol.iterator]();
+  }
+
+  [Symbol.iterator]() {
+    return this;
+  }
+
+  next(): IteratorResult<[Node, Node]> {
+    for (;;) {
+      const { done, value } = this.headIterator.next();
+      if (this.tail === null || done) {
+        const { done, value } = this.tailIterator.next();
+        if (done) return { done: true } as IteratorResult<[Node, Node]>;
+
+        this.tail = value;
+        this.headIterator = this.dag.childrenOf(this.tail)[Symbol.iterator]();
+      } else {
+        return { done: false, value: [this.tail, value] } as const;
+      }
+    }
+  }
+}
+
 export class DirectedAcyclicGraph<Node>
   implements AbstractDirectedAcyclicGraph<Node>
 {
@@ -148,8 +180,12 @@ export class DirectedAcyclicGraph<Node>
     },
   });
 
-  public get nodes(): ReadonlySet<Node> {
-    return this._nodes;
+  public get nodes() {
+    return this._nodes.values();
+  }
+
+  public get edges(): IterableIterator<[Node, Node]> {
+    return new DirectedAcyclicGraphEdgeIterator(this);
   }
 
   /**

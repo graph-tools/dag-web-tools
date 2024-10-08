@@ -47,12 +47,22 @@ export class LayeredMock extends DirectedAcyclicGraphMock<MockNode> {
     const layers: MockNode[][] = [];
     size.forEach((layer) => layers.push(getMockNodes(layer)));
 
+    const edges = new Set<[MockNode, MockNode]>();
+    layers.forEach(
+      (layer, index) =>
+        index + 1 < layers.length &&
+        layer.forEach((tail) =>
+          layers[index + 1].forEach((head) => edges.add([tail, head])),
+        ),
+    );
+
     const descendants = getDescendants(layers);
     const ancestors = getDescendants(layers.reverse());
 
     const nodes = layers.flat();
     super({
       nodes: new Set<MockNode>(nodes),
+      edges,
       ancestors,
       descendants,
       size: {

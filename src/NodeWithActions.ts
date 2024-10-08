@@ -1,5 +1,4 @@
-import { DirectedAcyclicGraph } from '.';
-import { NodeWithActionsModel } from './models';
+import { AbstractDirectedAcyclicGraph, NodeWithActionsModel } from './models';
 import { ProxyReadonlySet } from './utils';
 
 export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
@@ -14,7 +13,7 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
      *
      * @internal
      */
-    protected source: DirectedAcyclicGraph<Node>,
+    protected source: AbstractDirectedAcyclicGraph<Node>,
   ) {}
 
   /**

@@ -23,7 +23,7 @@ export class CrownMock extends DirectedAcyclicGraphMock<MockNode> {
   constructor(size: number) {
     const top = getMockNodes(size);
     const bottom = getMockNodes(size);
-    const adjacencyLists = new ForceMap<MockNode, MockNode[]>(() => []);
+    const edges = new Set<[MockNode, MockNode]>();
     const ancestors = new ForceMap<MockNode, Set<MockNode>[]>(() => [
       new Set(),
       new Set(),
@@ -37,7 +37,8 @@ export class CrownMock extends DirectedAcyclicGraphMock<MockNode> {
       const firstChild = bottom[Math.max(0, index - 1)];
       const secondChild = bottom[Math.min(index + 1, size - 1)];
 
-      adjacencyLists.forceGet(node).push(firstChild, secondChild);
+      edges.add([node, firstChild]).add([node, secondChild]);
+
       descendants.forceGet(node)[1].add(firstChild).add(secondChild);
       ancestors.forceGet(firstChild)[1].add(node);
       ancestors.forceGet(secondChild)[1].add(node);
@@ -45,6 +46,7 @@ export class CrownMock extends DirectedAcyclicGraphMock<MockNode> {
 
     super({
       nodes: new Set<MockNode>([...top, ...bottom]),
+      edges,
       ancestors,
       descendants,
       size: { nodes: 2 * size, edges: 2 * size, depth: 1, width: size },

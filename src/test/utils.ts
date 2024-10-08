@@ -10,6 +10,25 @@ export function getMockNodes(count: number): MockNode[] {
   return nodes;
 }
 
-export function areSetsEqual<T>(a: ReadonlySet<T>, b: ReadonlySet<T>) {
-  return a.size === b.size && [...a].every((value) => b.has(value));
+type EqualOptions<T> = {
+  equal: (a: T, b: T) => boolean;
+};
+
+export function areSetsEqual<T>(
+  a: ReadonlySet<T>,
+  b: ReadonlySet<T>,
+  options: EqualOptions<T> = { equal: (a, b) => a === b },
+) {
+  return (
+    a.size === b.size &&
+    [...a].every((a) => [...b].some((b) => options.equal(a, b)))
+  );
+}
+
+export function areMultisetsEqual<T>(
+  a: ReadonlyArray<T>,
+  b: ReadonlyArray<T>,
+  options: EqualOptions<T> = { equal: (a, b) => a === b },
+) {
+  return a.length === b.length && areSetsEqual(new Set(a), new Set(b), options);
 }
