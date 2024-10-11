@@ -7,6 +7,7 @@ import {
 } from '../test/mocks';
 import { MockNode, areSetsEqual } from '../test';
 import { DepthFirstIterator, IteratorInjectOn } from './DepthFirstIterator';
+import { DirectedAcyclicGraph, EdgeAdditionStrategy } from '..';
 
 describe('Depth First Iterator', () => {
   const testCases = [
@@ -219,5 +220,19 @@ describe('Depth First Iterator', () => {
         }
       });
     });
+  });
+
+  test('should throw CycleProhibitedException when a cycle is found', () => {
+    const dag = DirectedAcyclicGraph.from(new ChainMock(10), {
+      edgeAdditionStrategy: EdgeAdditionStrategy.UNSAFE,
+    });
+    const nodes = [...dag.nodes];
+    dag.connect(nodes[nodes.length - 1], nodes[0]);
+
+    const iterator = new DepthFirstIterator(dag, nodes[0]);
+
+    expect(() => [...iterator]).toThrowError(
+      /^Cycle found when traversing depth-first iterator$/,
+    );
   });
 });
