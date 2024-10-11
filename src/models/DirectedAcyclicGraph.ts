@@ -42,7 +42,12 @@ export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
   /**
    * Contains all nodes of the DAG.
    */
-  nodes: Iterable<Node>;
+  nodes: IterableIterator<Node>;
+
+  /**
+   * Contains all edges of the DAG.
+   */
+  edges: IterableIterator<[tail: Node, head: Node]>;
 
   /**
    * Checks if the specified `node` is contained in the DAG.

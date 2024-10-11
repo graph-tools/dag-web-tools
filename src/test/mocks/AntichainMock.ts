@@ -17,12 +17,10 @@ import { MockNode } from '..';
 export class AntichainMock extends DirectedAcyclicGraphMock<MockNode> {
   constructor(size: number) {
     const nodes = getMockNodes(size);
-    const adjacencyLists = new Map<MockNode, MockNode[]>();
-
-    nodes.forEach((node) => adjacencyLists.set(node, []));
 
     super({
-      nodes: new Set<MockNode>(nodes),
+      nodes: new Set(nodes),
+      edges: new Set(),
       ancestors: new Map(),
       descendants: new Map(),
       size: { nodes: size, edges: 0, depth: 0, width: size },
