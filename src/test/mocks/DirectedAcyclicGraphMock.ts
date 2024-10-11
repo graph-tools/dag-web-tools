@@ -55,6 +55,7 @@ export class DirectedAcyclicGraphMock<Node>
   }
 
   public hasPathBetween(tail: Node, head: Node, maxLength: number) {
+    if (tail === head) return true;
     const layer = Math.min(
       (this._descendants.get(tail)?.length ?? 0) - 1,
       Math.floor(maxLength),

@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { DirectedAcyclicGraph } from './DirectedAcyclicGraph';
+import {
+  DirectedAcyclicGraph,
+  EdgeAdditionStrategy,
+} from './DirectedAcyclicGraph';
 import { AntichainMock, ChainMock, CrownMock, LayeredMock } from './test/mocks';
 import { areSetsEqual, getMockNode, getMockNodes } from './test/utils';
 import { DirectedAcyclicGraphMock } from './test/mocks/DirectedAcyclicGraphMock';
@@ -349,6 +352,48 @@ describe(' Directed Acyclic Graph', () => {
           }
         }
       }
+    });
+
+    test('should throw CycleProhibitedException when creating loop (SAFE)', () => {
+      const dag = DirectedAcyclicGraph.from(new ChainMock(10), {
+        edgeAdditionStrategy: EdgeAdditionStrategy.SAFE,
+      });
+      const nodes = [...dag.nodes];
+
+      /**
+       * No self-connections in SAFE mode.
+       */
+      expect(() => dag.connect(nodes[0], nodes[0])).toThrowError(
+        /^Adding a designated edge .* forms a loop$/,
+      );
+
+      /**
+       * No loops in SAFE mode.
+       */
+      expect(() => dag.connect(nodes[nodes.length - 1], nodes[0])).toThrowError(
+        /^Adding a designated edge .* forms a loop$/,
+      );
+    });
+
+    test('should *not* throw CycleProhibitedException when creating loop (UNSAFE)', () => {
+      const dag = DirectedAcyclicGraph.from(new ChainMock(10), {
+        edgeAdditionStrategy: EdgeAdditionStrategy.UNSAFE,
+      });
+      const nodes = [...dag.nodes];
+
+      /**
+       * Self-connections are allowed in UNSAFE mode.
+       */
+      expect(() => dag.connect(nodes[0], nodes[0])).not.toThrowError(
+        /^Adding a designated edge .* forms a loop$/,
+      );
+
+      /**
+       * Loops are allowed in UNSAFE mode.
+       */
+      expect(() =>
+        dag.connect(nodes[nodes.length - 1], nodes[0]),
+      ).not.toThrowError(/^Adding a designated edge .* forms a loop$/);
     });
   });
 

@@ -296,6 +296,7 @@ export class DirectedAcyclicGraph<Node>
    * * `n` - number of nodes in the tree affected by the iteration.
    */
   public hasPathBetween(tail: Node, head: Node, maxLength: number = +Infinity) {
+    if (tail === head) return true;
     const iterator = new DepthFirstIterator(this, tail, { depth: maxLength });
 
     for (const [node, details] of iterator) {
