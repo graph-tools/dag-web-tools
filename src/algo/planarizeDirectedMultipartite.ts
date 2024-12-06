@@ -109,7 +109,11 @@ export interface PlanarizationParams {
 export function planarizeDirectedMultipartite<Node>(
   multipartite: AbstractDirectedMultipartite<Node>,
   source: ReadonlyDirectedAcyclicGraph<Node>,
-  params: PlanarizationParams,
+  params: PlanarizationParams = {
+    wind: 1 / 3,
+    base: 1 / 3,
+    gravity: 1 / 3,
+  },
 ) {
   let maxPartSize = 0;
 
