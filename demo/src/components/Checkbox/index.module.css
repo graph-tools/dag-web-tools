@@ -1,0 +1,16 @@
+.checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 100%;
+
+  &[data-disabled='true'] {
+    color: gray;
+  }
+}
+
+.input {
+  margin: 0;
+}

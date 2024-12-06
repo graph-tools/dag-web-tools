@@ -1,0 +1,10 @@
+.group {
+  min-width: 100px;
+  width: 100%;
+  min-height: 100px;
+  height: 100%;
+}
+
+.resizer {
+  padding: 0;
+}

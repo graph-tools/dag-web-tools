@@ -1,0 +1,15 @@
+.edge {
+  stroke: gray;
+
+  &.selected {
+    stroke: black;
+  }
+
+  &.active {
+    stroke: blue;
+  }
+
+  &.inactive {
+    stroke: lightgray;
+  }
+}

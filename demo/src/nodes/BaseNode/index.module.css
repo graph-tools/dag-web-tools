@@ -1,0 +1,73 @@
+.node {
+  box-sizing: border-box;
+  border: 3px solid #888;
+  border-radius: 50%;
+  padding: 16px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: white;
+  color: #888;
+  font-weight: 600;
+  transition:
+    color linear 100ms,
+    border-color linear 100ms;
+
+  &.loading {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    mask:
+      linear-gradient(black 0 0) padding-box,
+      repeating-conic-gradient(
+          black calc(var(--p) + 0%),
+          black calc(var(--p) + 6%),
+          transparent calc(var(--p) + 6%),
+          transparent calc(var(--p) + 9%)
+        )
+        border-box;
+    animation: progress 10s linear infinite;
+  }
+
+  &.active {
+    border-color: blue !important;
+    color: blue !important;
+
+    &.inactive {
+      border-style: dotted;
+    }
+  }
+
+  &.inactive {
+    border-color: #ccc;
+    color: #ccc;
+  }
+
+  &:not(.active).selected {
+    border-color: #333;
+    color: #333;
+
+    &.inactive {
+      border-style: dotted;
+    }
+  }
+}
+
+@property --p {
+  syntax: '<percentage>';
+  initial-value: 0%;
+  inherits: false;
+}
+
+@keyframes progress {
+  from {
+    --p: 0%;
+  }
+
+  to {
+    --p: 100%;
+  }
+}

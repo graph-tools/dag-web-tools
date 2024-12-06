@@ -1,0 +1,15 @@
+.wrapper {
+  &:has(.node.root) {
+    filter: drop-shadow(0 0 10px rgba(0 0 255 / 25%));
+  }
+}
+
+.toolbar {
+  border-radius: 4px;
+  padding: 4px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  background: white;
+  box-shadow: 0 0 4px rgba(0 0 0 / 30%);
+}

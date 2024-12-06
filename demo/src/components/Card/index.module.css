@@ -1,0 +1,86 @@
+.card {
+  padding: 12px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  user-select: none;
+}
+
+.title {
+  font-size: 32px;
+  line-height: 32px;
+  margin: 16px 0;
+}
+
+.demo {
+  cursor: pointer;
+
+  &[data-disabled='true'] {
+    cursor: not-allowed;
+
+    &.demo-content {
+      pointer-events: none;
+    }
+  }
+
+  &:not(&[data-disabled='true']):hover {
+    background: #f8f8f8;
+    cursor: pointer;
+  }
+}
+
+.demo-content {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.demo-title {
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.demo-status-bar {
+  margin: 0;
+  padding: 0;
+  height: 48px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+
+  .demo[data-disabled='true'] & {
+    opacity: 0.5;
+  }
+}
+
+.params {
+  margin: 0;
+  padding-left: 18px;
+  pointer-events: none;
+}
+
+.param {
+  margin: 4px 0;
+  font-size: 16px;
+
+  &[data-required='true']::marker {
+    width: 16px;
+    color: red;
+    content: '*';
+  }
+
+  &[data-done='true']::marker {
+    content: '';
+  }
+}
