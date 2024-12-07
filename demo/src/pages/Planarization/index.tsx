@@ -1,11 +1,11 @@
-import { OrderedMultipartite } from 'dag-web-tools';
+import { OrderedMultipartite } from '@self/dag';
 
 import React, { useEffect, useMemo } from 'react';
 import { Background, Controls, Edge, ReactFlow } from '@xyflow/react';
 
-import { Panel } from 'components';
-import { useDAGContext, useGroupContext } from 'contexts';
-import { DefaultConnectionLine, edgeTypes } from 'edges';
+import { Panel } from '@demo/components';
+import { useDAGContext, useGroupContext } from '@demo/contexts';
+import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
 import {
   edgeId,
   useChangeHandlers,
@@ -13,8 +13,8 @@ import {
   useGroupBehaviour,
   useMerged,
   useSelection,
-} from 'hooks';
-import { nodeTypes } from 'nodes';
+} from '@demo/hooks';
+import { nodeTypes } from '@demo/nodes';
 
 import { PlanarizationCard } from './card';
 

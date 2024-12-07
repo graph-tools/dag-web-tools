@@ -1,4 +1,4 @@
-import { DirectedAcyclicGraph } from 'dag-web-tools';
+import { DirectedAcyclicGraph } from '@self/dag';
 import React, {
   PropsWithChildren,
   createContext,
@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from 'react';
 
-import { NodeWithData, useDAG } from 'hooks';
+import { NodeWithData, useDAG } from '@demo/hooks';
 
 import * as T from './types';
 

@@ -1,14 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import { Markers } from 'edges';
+import { Markers } from '@demo/edges';
 import {
   BreadthFirstIteratorPage,
   DepthFirstIteratorPage,
   IndexPage,
   PlanarizationPage,
   TopologicalIteratorPage,
-} from 'pages';
+} from '@demo/pages';
 
 export const Demo = () => {
   return (

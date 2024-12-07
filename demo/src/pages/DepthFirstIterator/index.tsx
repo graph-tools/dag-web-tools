@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 
-import { Panel } from 'components';
-import { useDAGContext } from 'contexts';
-import { nodeTypes } from 'nodes';
+import { Panel } from '@demo/components';
+import { useDAGContext } from '@demo/contexts';
+import { nodeTypes } from '@demo/nodes';
 import {
   edgeId,
   useChangeHandlers,
   useConnectionHandlers,
   useMerged,
   useSelection,
-} from 'hooks';
-import { DefaultConnectionLine, edgeTypes } from 'edges';
+} from '@demo/hooks';
+import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
 
 import { DepthFirstIteratorCard } from './card';
 

@@ -5,7 +5,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './index.css';
 
-import { DirectedAcyclicGraphProvider, GroupProvider } from 'contexts';
+import { DirectedAcyclicGraphProvider, GroupProvider } from '@demo/contexts';
 
 import { Demo } from './Demo';
 

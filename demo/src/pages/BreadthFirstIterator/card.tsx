@@ -1,4 +1,4 @@
-import { BreadthFirstIterator } from 'dag-web-tools';
+import { BreadthFirstIterator } from '@self/dag';
 import React, {
   useCallback,
   useEffect,
@@ -7,9 +7,9 @@ import React, {
   useState,
 } from 'react';
 
-import { Card } from 'components';
-import { getIgnored, getRootNode, useDAGContext, NodeData } from 'contexts';
-import { NodeWithData } from 'hooks';
+import { Card } from '@demo/components';
+import { getIgnored, getRootNode, useDAGContext, NodeData } from '@demo/contexts';
+import { NodeWithData } from '@demo/hooks';
 
 export const BreadthFirstIteratorCard = () => {
   const [instance, dag] = useDAGContext();

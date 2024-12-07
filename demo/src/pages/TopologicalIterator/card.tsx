@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Card } from 'components';
-import { NodeData, useDAGContext } from 'contexts';
-import { NodeWithData } from 'hooks';
+import { Card } from '@demo/components';
+import { NodeData, useDAGContext } from '@demo/contexts';
+import { NodeWithData } from '@demo/hooks';
 
 export const TopologicalIteratorCard = () => {
   const [instance, dag] = useDAGContext();

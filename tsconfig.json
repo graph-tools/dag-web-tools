@@ -10,14 +10,14 @@
 
     "baseUrl": ".",
     "paths": {
-      "dag-web-tools": ["src/index.ts"],
-      "assets/*": ["demo/src/assets/*"],
-      "hooks": ["demo/src/hooks/index.tsx"],
-      "contexts": ["demo/src/contexts/index.tsx"],
-      "components": ["demo/src/components/index.tsx"],
-      "nodes": ["demo/src/nodes/index.tsx"],
-      "edges": ["demo/src/edges/index.tsx"],
-      "pages": ["demo/src/pages/index.tsx"]
+      "@self/dag": ["src/index.ts"],
+      "@demo/assets/*": ["demo/src/assets/*"],
+      "@demo/hooks": ["demo/src/hooks/index.tsx"],
+      "@demo/contexts": ["demo/src/contexts/index.tsx"],
+      "@demo/components": ["demo/src/components/index.tsx"],
+      "@demo/nodes": ["demo/src/nodes/index.tsx"],
+      "@demo/edges": ["demo/src/edges/index.tsx"],
+      "@demo/pages": ["demo/src/pages/index.tsx"]
     },
 
     "moduleResolution": "bundler",

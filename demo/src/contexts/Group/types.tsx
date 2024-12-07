@@ -3,7 +3,7 @@ import {
   Node as ReactFlowNode,
 } from '@xyflow/react';
 
-import { DirectedAcyclicGraphActions } from 'hooks';
+import { DirectedAcyclicGraphActions } from '@demo/hooks';
 
 type Data = {
   disabled?: boolean;

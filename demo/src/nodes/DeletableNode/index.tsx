@@ -1,7 +1,7 @@
 import React from 'react';
 import { NodeToolbar, Position, useReactFlow } from '@xyflow/react';
 
-import { NodeProps } from 'contexts';
+import { NodeProps } from '@demo/contexts';
 
 import { BaseNode } from '../BaseNode';
 

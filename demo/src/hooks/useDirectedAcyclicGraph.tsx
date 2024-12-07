@@ -2,7 +2,7 @@ import {
   DirectedAcyclicGraph,
   EdgeAdditionStrategy,
   ReadonlyDirectedAcyclicGraph,
-} from 'dag-web-tools';
+} from '@self/dag';
 import { useRef, useState } from 'react';
 
 export type NodeWithData<Data> = { id: string; data: Data };

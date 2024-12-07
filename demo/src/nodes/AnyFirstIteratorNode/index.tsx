@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useCallback } from 'react';
 import { NodeToolbar } from '@xyflow/react';
 
-import { Checkbox } from 'components';
-import { NodeProps, getRootNode, useDAGContext } from 'contexts';
+import { Checkbox } from '@demo/components';
+import { NodeProps, getRootNode, useDAGContext } from '@demo/contexts';
 
 import { BaseNode } from '../BaseNode';
 import S from './index.module.css';

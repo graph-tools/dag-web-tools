@@ -6,7 +6,7 @@ import {
   ungroupNodes,
   useDAGContext,
   useGroupContext,
-} from 'contexts';
+} from '@demo/contexts';
 
 export function useGroupBehaviour(
   [instance, dag]: ReturnType<typeof useDAGContext>,

@@ -1,5 +1,5 @@
-import { ReadonlyDirectedAcyclicGraph } from 'dag-web-tools';
-import { DirectedAcyclicGraphActions, NodeWithData } from 'hooks';
+import { ReadonlyDirectedAcyclicGraph } from '@self/dag';
+import { DirectedAcyclicGraphActions, NodeWithData } from '@demo/hooks';
 
 import * as T from './types';
 

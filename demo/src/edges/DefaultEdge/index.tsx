@@ -12,7 +12,7 @@ import {
 } from '@xyflow/react';
 import cn from 'classnames';
 
-import { nodeShapes, Shape } from 'nodes';
+import { nodeShapes, Shape } from '@demo/nodes';
 
 import S from './index.module.css';
 

@@ -1,12 +1,12 @@
 import {
   OrderedMultipartite,
   planarizeDirectedMultipartite,
-} from 'dag-web-tools';
+} from '@self/dag';
 import React, { useCallback } from 'react';
 
-import { Card } from 'components';
-import { NodeData, useDAGContext, useGroupContext } from 'contexts';
-import { NodeWithData } from 'hooks';
+import { Card } from '@demo/components';
+import { NodeData, useDAGContext, useGroupContext } from '@demo/contexts';
+import { NodeWithData } from '@demo/hooks';
 
 const GAP = 16;
 const SIZE = 64;

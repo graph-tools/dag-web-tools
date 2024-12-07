@@ -1,22 +1,22 @@
 import React, { useMemo } from 'react';
 import { Background, Controls, MarkerType, ReactFlow } from '@xyflow/react';
 
-import TopsortLogo from 'assets/topsort.svg';
-import DfsLogo from 'assets/dfs.svg';
-import BfsLogo from 'assets/bfs.svg';
-import PlanarizationLogo from 'assets/planarization.svg';
+import TopsortLogo from '@demo/assets/topsort.svg';
+import DfsLogo from '@demo/assets/dfs.svg';
+import BfsLogo from '@demo/assets/bfs.svg';
+import PlanarizationLogo from '@demo/assets/planarization.svg';
 
-import { Panel, Navigation } from 'components';
-import { useDAGContext } from 'contexts';
-import { DefaultConnectionLine, edgeTypes } from 'edges';
+import { Panel, Navigation } from '@demo/components';
+import { useDAGContext } from '@demo/contexts';
+import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
 import {
   edgeId,
   useChangeHandlers,
   useConnectionHandlers,
   useMerged,
   useSelection,
-} from 'hooks';
-import { nodeTypes } from 'nodes';
+} from '@demo/hooks';
+import { nodeTypes } from '@demo/nodes';
 
 export const DemoNavigation = ({ className }: { className?: string }) => (
   <Navigation className={className}>

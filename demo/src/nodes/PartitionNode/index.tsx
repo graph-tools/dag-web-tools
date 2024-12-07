@@ -7,7 +7,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 
-import { GroupProps } from 'contexts';
+import { GroupProps } from '@demo/contexts';
 
 import S from './index.module.css';
 

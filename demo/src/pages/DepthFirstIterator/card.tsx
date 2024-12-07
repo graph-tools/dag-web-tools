@@ -1,4 +1,4 @@
-import { DepthFirstIterator, IteratorInjectOn } from 'dag-web-tools';
+import { DepthFirstIterator, IteratorInjectOn } from '@self/dag';
 import React, {
   useCallback,
   useEffect,
@@ -7,9 +7,9 @@ import React, {
   useState,
 } from 'react';
 
-import { Card, Radio } from 'components';
-import { NodeData, getIgnored, getRootNode, useDAGContext } from 'contexts';
-import { NodeWithData } from 'hooks';
+import { Card, Radio } from '@demo/components';
+import { NodeData, getIgnored, getRootNode, useDAGContext } from '@demo/contexts';
+import { NodeWithData } from '@demo/hooks';
 
 import S from './index.module.css';
 
