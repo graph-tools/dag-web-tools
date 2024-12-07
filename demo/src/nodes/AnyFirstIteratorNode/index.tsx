@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 import { NodeToolbar } from '@xyflow/react';
 
 import { Checkbox } from 'components';
@@ -10,40 +10,42 @@ import S from './index.module.css';
 export const AnyFirstIteratorNode = ({ id, selected, data }: NodeProps) => {
   const [instance, dag] = useDAGContext();
   const { root, ignored, loading, disabled } = data;
+
+  const setRoot = useCallback(() => {
+    const rootId = getRootNode(instance)?.id;
+
+    dag.batch(() => {
+      dag.replace(id, (data) => ({
+        ...data,
+        data: { ...data.data, root: true },
+      }));
+      rootId &&
+        dag.replace(rootId, (data) => ({
+          ...data,
+          data: { ...data.data, root: false },
+        }));
+    });
+  }, [instance]);
+
+  const toggleIgnored = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    dag.replace(id, (data) => ({
+      ...data,
+      data: { ...data.data, ignored: e.target.checked },
+    }));
+  }, []);
+
   return (
     <>
       <NodeToolbar className={S.toolbar}>
         {!root && (
-          <button
-            onClick={() => {
-              const rootId = getRootNode(instance)?.id;
-
-              dag.batch(() => {
-                dag.replace(id, (data) => ({
-                  ...data,
-                  data: { ...data.data, root: true },
-                }));
-                rootId &&
-                  dag.replace(rootId, (data) => ({
-                    ...data,
-                    data: { ...data.data, root: false },
-                  }));
-              });
-            }}
-            disabled={disabled}
-          >
+          <button onClick={setRoot} disabled={disabled}>
             Set root
           </button>
         )}
         <Checkbox
           defaultChecked={ignored}
           disabled={disabled}
-          onChange={(e) =>
-            dag.replace(id, (data) => ({
-              ...data,
-              data: { ...data.data, ignored: e.target.checked },
-            }))
-          }
+          onChange={toggleIgnored}
         >
           Ignore
         </Checkbox>

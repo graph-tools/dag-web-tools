@@ -1,5 +1,11 @@
 import { DepthFirstIterator, IteratorInjectOn } from 'dag-web-tools';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { Card, Radio } from 'components';
 import { NodeData, getIgnored, getRootNode, useDAGContext } from 'contexts';
@@ -26,6 +32,39 @@ export const DepthFirstIteratorCard = () => {
 
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const iterating = currentNodeId !== null;
+
+  const iterate = useCallback(
+    () =>
+      dag.batch(() => {
+        if (!iterator.current) {
+          iterator.current = new DepthFirstIterator(instance, root!, {
+            depth,
+            injectOn,
+            ignore: new Set(getIgnored(instance)),
+          });
+        }
+
+        const { done, value } = iterator.current.next();
+        currentNodeId &&
+          dag.replace(currentNodeId, (data) => ({
+            ...data,
+            data: { ...data.data, loading: false },
+          }));
+
+        if (done) {
+          iterator.current = null;
+          setCurrentNodeId(null);
+        } else {
+          const [node] = value;
+          dag.replace(node.id, {
+            ...node.data,
+            data: { ...node.data.data, loading: true },
+          });
+          setCurrentNodeId(node.id);
+        }
+      }),
+    [currentNodeId, instance, root, depth, injectOn],
+  );
 
   useEffect(
     () => () =>
@@ -55,36 +94,7 @@ export const DepthFirstIteratorCard = () => {
       <Card.DemoSection
         status={iterating ? 'Next' : 'Iterate'}
         disabled={!root}
-        onClick={() =>
-          dag.batch(() => {
-            if (!iterator.current) {
-              iterator.current = new DepthFirstIterator(instance, root!, {
-                depth,
-                injectOn,
-                ignore: new Set(getIgnored(instance)),
-              });
-            }
-
-            const { done, value } = iterator.current.next();
-            currentNodeId &&
-              dag.replace(currentNodeId, (data) => ({
-                ...data,
-                data: { ...data.data, loading: false },
-              }));
-
-            if (done) {
-              iterator.current = null;
-              setCurrentNodeId(null);
-            } else {
-              const [node] = value;
-              dag.replace(node.id, {
-                ...node.data,
-                data: { ...node.data.data, loading: true },
-              });
-              setCurrentNodeId(node.id);
-            }
-          })
-        }
+        onClick={iterate}
       >
         <Card.Params>
           <Card.Param done={Boolean(root)} required>
