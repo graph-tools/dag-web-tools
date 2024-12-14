@@ -1,18 +1,32 @@
 {
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "demo/**/*"],
   "exclude": ["src/**/*.test.ts"],
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
     "module": "es6",
-    "lib": ["ES2020"],
+    "lib": ["ES2020", "dom"],
     "skipLibCheck": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@self/dag": ["src/index.ts"],
+      "@demo/assets/*": ["demo/src/assets/*"],
+      "@demo/hooks": ["demo/src/hooks/index.tsx"],
+      "@demo/contexts": ["demo/src/contexts/index.tsx"],
+      "@demo/components": ["demo/src/components/index.tsx"],
+      "@demo/nodes": ["demo/src/nodes/index.tsx"],
+      "@demo/edges": ["demo/src/edges/index.tsx"],
+      "@demo/pages": ["demo/src/pages/index.tsx"]
+    },
 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    
+    "jsx": "react",
 
     "strict": true,
     "noUnusedLocals": true,
