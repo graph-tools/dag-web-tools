@@ -34,7 +34,6 @@ describe(' Directed Acyclic Graph', () => {
       /**
        * Created DAG should has all and only edges specified by mock.
        */
-      console.log([...dag.edges].length, [...mock.edges].length);
       expect(
         areMultisetsEqual([...dag.edges], [...mock.edges], {
           equal: edgesEqual,
