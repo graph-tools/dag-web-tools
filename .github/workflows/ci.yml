@@ -9,6 +9,33 @@ on:
       - main
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check lint (ESLint)
+        run: npm run eslint-check
+
+      - name: Check lint (Stylelint)
+        run: npm run stylelint-check
+
+      - name: Check code formatting (Prettier)
+        run: npm run prettier-check
+
+      - name: Run tests (Vitest)
+        run: npm run unit 
+
   build:
     runs-on: ubuntu-latest
 
@@ -27,18 +54,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
-      - name: Check lint (ESLint)
-        run: npm run eslint-check
-
-      - name: Check lint (Stylelint)
-        run: npm run stylelint-check
-
-      - name: Check code formatting (Prettier)
-        run: npm run prettier-check
-
-      - name: Run tests (Vitest)
-        run: npm run unit 
 
       - name: Build library 
         run: npm run build
