@@ -105,7 +105,7 @@ export class DirectedAcyclicGraphMock<Node>
       descendants: this._ancestors,
       ancestors: this._descendants,
       size: this._size,
-      sorted: this._sorted,
+      sorted: [...this._sorted].reverse(),
     });
   }
 
