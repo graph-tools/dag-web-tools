@@ -57,7 +57,7 @@ export class LayeredMock extends DirectedAcyclicGraphMock<MockNode> {
     );
 
     const descendants = getDescendants(layers);
-    const ancestors = getDescendants(layers.reverse());
+    const ancestors = getDescendants([...layers].reverse());
 
     const nodes = layers.flat();
     super({
