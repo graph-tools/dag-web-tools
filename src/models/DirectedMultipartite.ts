@@ -59,4 +59,16 @@ export interface AbstractDirectedMultipartite<Node>
    * @returns Order of the part if node contained, `undefined` otherwise.
    */
   orderOf: (node: Node) => number | undefined;
+
+  /**
+   *
+   * @returns `true` if the numbers of the order have changed, `false` if no changes were required.
+   */
+  normalize: () => boolean;
+
+  /**
+   *
+   * @returns new multipartite with the reverse order
+   */
+  revert: () => AbstractDirectedMultipartite<Node>;
 }

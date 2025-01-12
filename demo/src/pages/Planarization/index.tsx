@@ -4,7 +4,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Background, Controls, Edge, ReactFlow } from '@xyflow/react';
 
 import { Panel } from '@demo/components';
-import { useDAGContext, useGroupContext } from '@demo/contexts';
+import { groupNodes, useDAGContext, useGroupContext } from '@demo/contexts';
 import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
 import {
   edgeId,
@@ -19,9 +19,60 @@ import { nodeTypes } from '@demo/nodes';
 import { PlanarizationCard } from './card';
 
 export const PlanarizationPage = () => {
+  const [instance, dag] = useDAGContext();
   const [selected, onSelectionChange] = useSelection();
   const [groupsInstance, groups] = useGroupContext();
-  const groupNodes = useMemo(
+
+  useEffect(() => {
+    dag.clear();
+
+    const a1 = dag.add({ position: { x: 0, y: 0 }, data: {} });
+    const a2 = dag.add({ position: { x: 0, y: 100 }, data: {} });
+    const a = groups.add({
+      position: { x: 0 - 20, y: 0 - 20 },
+      height: 300,
+      data: {},
+    });
+    groups.setMembers(a, new Set([a1, a2]));
+    groupNodes([a1, a2], a, dag);
+
+    const b1 = dag.add({ position: { x: 200, y: 0 }, data: {} });
+    const b2 = dag.add({ position: { x: 200, y: 100 }, data: {} });
+    const b3 = dag.add({ position: { x: 200, y: 200 }, data: {} });
+    const b = groups.add({
+      position: { x: 200 - 20, y: 0 - 20 },
+      height: 300,
+      data: {},
+    });
+    groups.setMembers(b, new Set([b1, b2, b3]));
+    groupNodes([b1, b2, b3], b, dag);
+
+    const c1 = dag.add({ position: { x: 400, y: 0 }, data: {} });
+    const c2 = dag.add({ position: { x: 400, y: 100 }, data: {} });
+    const c = groups.add({
+      position: { x: 400 - 20, y: 0 - 20 },
+      height: 300,
+      data: {},
+    });
+    groups.setMembers(c, new Set([c1, c2]));
+    groupNodes([c1, c2], c, dag);
+
+    groups.connect(a, b);
+    groups.connect(b, c);
+    dag.connect(a1, b2);
+    dag.connect(a2, b1);
+    dag.connect(a2, b3);
+    dag.connect(b1, c2);
+    dag.connect(b2, c2);
+    dag.connect(b3, c1);
+
+    return () => {
+      dag.clear();
+      groups.clear();
+    };
+  }, []);
+
+  const groupedNodes = useMemo(
     () =>
       [...groupsInstance.nodes].map((node) => ({
         id: node.id,
@@ -56,7 +107,6 @@ export const PlanarizationPage = () => {
     return ordered;
   }, [groupsInstance]);
 
-  const [instance, dag] = useDAGContext();
   const nodes = useMemo(
     () =>
       [...instance.nodes].map((node) => ({
@@ -130,11 +180,9 @@ export const PlanarizationPage = () => {
   const onConnectMerged = useMerged(onConnect, onOrder);
   const onConnectEndMerged = useMerged(onConnectEnd, onOrderingEnd);
 
-  useEffect(() => () => groups.clear(), []);
-
   return (
     <ReactFlow
-      nodes={[...groupNodes, ...nodes]}
+      nodes={[...groupedNodes, ...nodes]}
       edges={[...orderEdges, ...edges]}
       onConnect={onConnectMerged}
       onConnectEnd={onConnectEndMerged}

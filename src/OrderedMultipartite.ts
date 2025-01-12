@@ -1,4 +1,4 @@
-import { AbstractDirectedMultipartite } from '.';
+import { AbstractDirectedMultipartite } from './models';
 import { ForceMap } from './utils';
 
 export class OrderedMultipartite<Node>
@@ -99,5 +99,59 @@ export class OrderedMultipartite<Node>
    */
   public nodesOf(order: number) {
     return this._nodes.get(order);
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * Time complexity (V8): `O(N*logN)`
+   */
+  public normalize() {
+    // TODO: optimize
+    const orders = new Map(
+      Array.from(this)
+        .map((node) => node[0])
+        .sort((a, b) => a - b)
+        .map((order, i) => [order, i]),
+    );
+
+    let isChanged = false;
+    for (const [order, nodes] of this) {
+      for (const node of nodes) {
+        const newOrder = orders.get(order)!;
+        if (newOrder !== order) {
+          this.set(node, newOrder);
+          if (!isChanged) isChanged = true;
+        }
+      }
+    }
+
+    return isChanged;
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * Time complexity (V8): `O(N*logN)`
+   */
+  revert() {
+    // TODO: optimize
+    const orders = new Map(
+      Array.from(this)
+        .map((node) => node[0])
+        .sort((a, b) => b - a)
+        .map((order, i) => [order, i]),
+    );
+
+    const result = new OrderedMultipartite<Node>();
+    for (const [order, nodes] of this) {
+      for (const node of nodes) {
+        result.set(node, orders.get(order)!);
+      }
+    }
+
+    return result;
   }
 }
