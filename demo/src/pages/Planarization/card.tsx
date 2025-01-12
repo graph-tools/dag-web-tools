@@ -1,7 +1,4 @@
-import {
-  OrderedMultipartite,
-  planarizeDirectedMultipartite,
-} from '@self/dag';
+import { OrderedMultipartite, planarizeDirectedMultipartite } from '@self/dag';
 import React, { useCallback } from 'react';
 
 import { Card } from '@demo/components';

@@ -23,19 +23,17 @@ function iteration<Node>({
 
       parentsCount = 0;
       for (const parent of source.parentsOf(node)) {
-        if (
-          !multipartite.hasNode(parent) ||
-          partOrder <= multipartite.orderOf(parent)!
-        ) {
-          continue;
-        }
+        if (!multipartite.hasNode(parent)) continue;
+        if (partOrder <= multipartite.orderOf(parent)!) continue;
 
-        order.set(
-          node,
-          (order.get(node) ?? 0) +
-            (base.get(parent) ?? 0) /
-              (partOrder - multipartite.orderOf(parent)!),
-        );
+        const currentOrder = order.get(node) ?? 0;
+        const baseParent = base.get(parent) ?? 0;
+        const parentOrder = multipartite.orderOf(parent) ?? 0;
+        const partDiff = Math.max(1, partOrder - parentOrder);
+
+        const newOrder = currentOrder + baseParent / partDiff;
+        order.set(node, newOrder);
+
         ++parentsCount;
       }
 
@@ -62,40 +60,37 @@ function getStableNodes<Node>(
   source: ReadonlyDirectedAcyclicGraph<Node>,
 ): Set<Node> {
   const stable = new Set<Node>();
+  const unstable = new Set<Node>();
 
-  let stableParent: Node | null = null;
   for (const [order, nodes] of multipartite) {
     for (const node of nodes) {
-      stableParent = null;
-
-      for (const parent of source.parentsOf(node)) {
-        if (
-          !multipartite.hasNode(parent) ||
-          order <= multipartite.orderOf(parent)!
-        ) {
-          continue;
-        }
-
-        if (stableParent !== null) {
-          stableParent == null;
-          break;
-        }
-
-        stableParent = parent;
+      const parents = source.parentsOf(node);
+      if (parents.size > 1) {
+        for (const parent of parents) unstable.add(parent);
+        continue;
       }
 
-      if (stableParent) stable.add(stableParent);
+      for (const parent of parents) {
+        if (!multipartite.hasNode(parent)) continue;
+        if (order <= multipartite.orderOf(parent)!) continue;
+        if (!unstable.has(parent)) stable.add(parent);
+      }
     }
   }
+
+  for (const node of unstable) stable.delete(node);
 
   return stable;
 }
 
 export interface PlanarizationParams {
-  base: number;
-  wind: number;
-  gravity: number;
+  base?: number;
+  wind?: number;
+  gravity?: number;
+  useStable?: boolean;
 }
+
+const MAX_ITERATION_COUNT = 10;
 
 /**
  * This algorithm reduces the number of edge intersections
@@ -109,57 +104,86 @@ export interface PlanarizationParams {
 export function planarizeDirectedMultipartite<Node>(
   multipartite: AbstractDirectedMultipartite<Node>,
   source: ReadonlyDirectedAcyclicGraph<Node>,
-  params: PlanarizationParams = {
-    wind: 1 / 3,
-    base: 1 / 3,
-    gravity: 1 / 3,
-  },
+  params?: PlanarizationParams,
 ) {
-  let maxPartSize = 0;
+  const {
+    base = 1 / 3,
+    gravity = 1 / 3,
+    wind = 1 / 3,
+    useStable = true,
+  } = params ?? {};
 
-  for (const [, part] of multipartite) {
-    maxPartSize = Math.max(part.size, maxPartSize);
-  }
+  const windOffset = useStable ? gravity + wind : 0;
+
+  const maxPartSize = Math.max(
+    ...Array.from(multipartite).map(([, part]) => part.size),
+  );
 
   const positions = new Map<Node, number>();
 
-  let base: number;
+  let basePosition: number;
   let offset: number;
   for (const [, part] of multipartite) {
-    base = Math.floor(maxPartSize - part.size);
+    basePosition = Math.floor(maxPartSize - part.size);
     offset = 0;
     for (const node of part) {
-      positions.set(node, base + offset++);
+      positions.set(node, basePosition + offset++);
     }
   }
 
-  const wind = iteration({
-    multipartite,
-    source,
-    base: positions,
-  });
+  let positionsChanged = false;
+  for (let i = 0; i < MAX_ITERATION_COUNT; i++) {
+    const prevPositions = new Map(positions);
 
-  const stable = getStableNodes(multipartite, source);
-  const gravity = iteration<Node>({
-    multipartite,
-    source: source.reversed(),
-    base: positions,
-    ignore: stable,
-  });
+    const windOrder = iteration({
+      multipartite,
+      source,
+      base: positions,
+    });
 
-  let position: number;
-  for (const [, part] of multipartite) {
-    for (const node of part) {
-      position = params.base * (positions.get(node) ?? 0);
-      position += params.wind * (wind.get(node) ?? 0);
-      if (stable.has(node)) {
-        position += params.gravity * (positions.get(node) ?? 0);
-      } else {
-        position += params.gravity * (gravity.get(node) ?? 0);
+    const stable = useStable
+      ? getStableNodes(multipartite, source)
+      : new Set<Node>();
+
+    const gravityOrder = iteration<Node>({
+      multipartite: multipartite.revert(),
+      source: source.reversed(),
+      base: positions,
+      ignore: stable,
+    });
+
+    let position: number;
+    for (const [, part] of multipartite) {
+      for (const node of part) {
+        const currentPosition = positions.get(node) ?? 0;
+        const windPosition = windOrder.get(node) ?? 0;
+        const gravityPosition = gravityOrder.get(node) ?? 0;
+
+        position = base * currentPosition;
+        position += (wind + windOffset) * windPosition;
+        if (stable.has(node)) {
+          position += (gravity * (currentPosition + gravityPosition)) / 2;
+        } else {
+          position += gravity * gravityPosition;
+        }
+
+        positions.set(node, position);
       }
-
-      positions.set(node, position);
     }
+
+    positionsChanged = false;
+    for (const [, part] of multipartite) {
+      Array.from(part)
+        .sort((a, b) => positions.get(a)! - positions.get(b)!)
+        .forEach((value, i) => {
+          positions.set(value, i);
+          if (!positionsChanged && prevPositions.get(value) !== i) {
+            positionsChanged = true;
+          }
+        });
+    }
+
+    if (!positionsChanged) break;
   }
 
   return positions;
