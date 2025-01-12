@@ -18,7 +18,7 @@ export default defineConfig({
       '@demo/pages': path.resolve('demo/src/pages/index.tsx'),
     },
   },
-  plugins: [dts({ exclude: './src/test/**' }), react(), svgr()],
+  plugins: [dts({ exclude: ['./src/test/**', './demo/**'] }), react(), svgr()],
   publicDir: './public',
   server: {
     port: 3000,
