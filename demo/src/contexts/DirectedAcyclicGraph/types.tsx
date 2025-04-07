@@ -4,13 +4,17 @@ import {
 } from '@xyflow/react';
 
 type Data = {
-  root?: boolean;
-  ignored?: boolean;
+  /** General */
   loading?: boolean;
   active?: boolean;
   inactive?: boolean;
   disabled?: boolean;
   group?: string;
+
+  /** Demo case specific */
+  root?: boolean;
+  ignored?: boolean;
+  equivalenceClassNumber?: number;
 };
 
 export type NodeData = Omit<ReactFlowNode<Data>, 'id'>;

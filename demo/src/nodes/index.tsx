@@ -1,6 +1,7 @@
 import { DeletableNode } from './DeletableNode';
 import { AnyFirstIteratorNode } from './AnyFirstIteratorNode';
 import { PartitionNode } from './PartitionNode';
+import { ClassifiedNode } from './ClassifiedNode';
 
 export enum Shape {
   CIRCLE = 'circle',
@@ -8,17 +9,20 @@ export enum Shape {
 }
 
 export const nodeTypes = {
-  Deletable: DeletableNode,
   AnyFirstIterator: AnyFirstIteratorNode,
+  Classified: ClassifiedNode,
+  Deletable: DeletableNode,
   Partition: PartitionNode,
 };
 
 export const nodeShapes: Record<string, Shape> = {
-  Deletable: Shape.CIRCLE,
   AnyFirstIterator: Shape.CIRCLE,
+  Classified: Shape.CIRCLE,
+  Deletable: Shape.CIRCLE,
   Partition: Shape.RECTANGLE,
 };
 
 export * from './AnyFirstIteratorNode';
+export * from './ClassifiedNode';
 export * from './DeletableNode';
 export * from './PartitionNode';
