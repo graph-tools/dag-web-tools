@@ -1,0 +1,46 @@
+name: "Release Draft"
+on:
+  workflow_dispatch:
+    inputs:
+      base_tag:
+        description: Base release tag
+        required: true
+        type: string
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: "Extract semantic version from tag"
+        id: semver_extractor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!"${{ inputs.base_tag }}".match(/v[0-9]+\.[0-9]+\.[0-9]+/)) {
+              core.setFailed('Invalid format of release tag');
+              return "";
+            }
+            return "${{ inputs.base_tag }}".substring(1)
+          result-encoding: string
+          
+      - name: "Bump Version"
+        id: version_bumper
+        uses: t15i/semver-bumper-action@v1.0.0
+        with:
+          basehead: ${{ inputs.base_tag }}...${{ github.ref }}
+          labels: breaking.feature.fix
+          version: ${{ steps.semver_extractor.outputs.result }}
+
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+          
+      - name: 'Create Release Draft'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v${{ steps.version_bumper.outputs.bumped_version }} \
+            --draft \
+            --generate-notes \
+            --notes-start-tag ${{ inputs.base_tag }} \
+            --target ${{ github.ref }}
