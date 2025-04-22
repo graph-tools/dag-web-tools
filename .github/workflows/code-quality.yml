@@ -1,0 +1,44 @@
+name: "Code Quality Check"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [labeled]
+    branches:
+      - main
+
+jobs:
+  demo-check:
+    if: ${{ github.event.label.name == 'demo' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/demo-quality-check-action
+
+  library-check:
+    if: ${{ github.event.label.name == 'lib' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/lib-quality-check-action
+
+  build-check:
+    if: ${{ github.event.label.name == 'lib' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build library 
+        run: npm run build

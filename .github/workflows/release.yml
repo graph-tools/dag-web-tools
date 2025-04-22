@@ -1,0 +1,84 @@
+name: "Release"
+on:
+  release:
+    types: [published]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/lib-quality-check-action
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: "Extract semantic version from tag"
+        id: semver_extractor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!"${{ github.event.release.tag_name }}".match(/v[0-9]+\.[0-9]+\.[0-9]+/)) {
+              core.setFailed('Invalid format of release tag');
+              return "";
+            }
+            return "${{ github.event.release.tag_name }}".substring(1)
+          result-encoding: string
+
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: "Bump Package Version"
+        run: sed -i 's/\("version":\) "[0-9]*.[0-9]*.[0-9]*"/\1 \"${{ steps.semver_extractor.outputs.result }}\"/' package.json
+        
+      - name: "Push package.json"
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add package.json 
+          git commit -m 'bump version to ${{ steps.semver_extractor.outputs.result }}'
+          git tag -f ${{ github.event.release.tag_name }}
+          git push --tags -f origin master
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+        
+      - name: "Build & Pack Package"
+        run: |
+          npm i
+          npm run build
+          npm pack
+          
+      - name: "Upload Built Package"
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: ./*.tgz
+          overwrite: true
+
+  publish:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        registry: ['https://registry.npmjs.org', 'https://npm.pkg.github.com'],
+        token: ["NPM_TOKEN", "GITHUB_PACKAGES_TOKEN"]
+    steps:
+      - name: "Download Built Package"
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+          
+      - name: "Setup Registry"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: matrix.registry
+          
+      - name: "Publish Package"
+        run: npm publish ./*.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets[matrix.token] }}
