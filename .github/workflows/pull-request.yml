@@ -1,0 +1,46 @@
+name: "Pull Request"
+on:
+- pull_request_target
+
+jobs:
+  labeler:
+    name: "Label Pull Request"
+    runs-on: ubuntu-latest
+    outputs:
+      labels: ${{ steps.labeler.outputs.all-labels }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - id: labeler
+        uses: actions/labeler@v5
+
+  demo-check:
+    needs: labeler
+    if: contains(needs.labeler.outputs.labels, 'demo')
+    name: "Demo Specific Checks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/demo-quality-check-action
+
+  library-check:
+    needs: labeler
+    if: contains(needs.labeler.outputs.labels, 'lib')
+    name: "Library Specific Checks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/lib-quality-check-action
+
+  build-check:
+    needs: labeler
+    if: contains(needs.labeler.outputs.labels, 'lib')
+    name: "Build Check"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/buildable-check-action
