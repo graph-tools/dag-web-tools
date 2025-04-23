@@ -1,0 +1,75 @@
+name: "Release"
+on:
+  release:
+    types: [published]
+jobs:
+  test:
+    name: "Test Release Package"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/lib-quality-check-action
+
+  build:
+    name: "Build Release Package"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          
+      - name: "Bump Package Version"
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          npm version "${{ github.event.release.tag_name }}" -m "Bump version to %s"
+          git push --tags -f origin main
+
+      - name: "Build Package"
+        run: |
+          npm i
+          npm run build
+          npm pack
+          
+      - name: "Upload Built Package"
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: ./*.tgz
+          overwrite: true
+
+  publish:
+    name: "Publish Release Package"
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - registry: 'https://registry.npmjs.org'
+            token: 'NPM_TOKEN'
+          - registry: 'https://npm.pkg.github.com'
+            token: 'GITHUB_TOKEN'
+    steps:
+      - name: "Download Built Package"
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+          
+      - name: "Setup Registry"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: ${{ matrix.registry }}
+          
+      - name: "Publish Package"
+        run: npm publish ./*.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ matrix.token == 'NPM_TOKEN' && secrets.NPM_TOKEN ||
+                               matrix.token == 'GITHUB_TOKEN' && secrets.GITHUB_TOKEN }}
