@@ -1,0 +1,17 @@
+name: "Buildable Check"
+description: "Try to build library"
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: "Install dependencies"
+      run: npm install
+      shell: bash
+
+    - name: "Build library" 
+      run: npm run build
+      shell: bash

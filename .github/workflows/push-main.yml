@@ -1,0 +1,29 @@
+name: "Push Main"
+on:
+  push:
+    branches:
+      - main
+jobs:
+  demo-check:
+    name: "Demo Specific Checks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/demo-quality-check-action
+
+  library-check:
+    name: "Library Specific Checks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/lib-quality-check-action
+
+  build-check:
+    name: "Build Check"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/buildable-check-action
