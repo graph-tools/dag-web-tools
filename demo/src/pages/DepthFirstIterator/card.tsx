@@ -8,7 +8,12 @@ import React, {
 } from 'react';
 
 import { Card, Radio } from '@demo/components';
-import { NodeData, getIgnored, getRootNode, useDAGContext } from '@demo/contexts';
+import {
+  NodeData,
+  getIgnored,
+  getRootNode,
+  useDAGContext,
+} from '@demo/contexts';
 import { NodeWithData } from '@demo/hooks';
 
 import S from './index.module.css';
