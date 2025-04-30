@@ -1,5 +1,9 @@
+import {
+  DirectedAcyclicGraph,
+  DirectedAcyclicGraphOptions,
+} from 'src/DirectedAcyclicGraph';
 import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
-import { getMockNodes } from '../utils';
+import { getMockNode, getMockNodes } from '../utils';
 import { MockNode } from '..';
 
 /**
@@ -26,5 +30,15 @@ export class AntichainMock extends DirectedAcyclicGraphMock<MockNode> {
       size: { nodes: size, edges: 0, depth: 0, width: size },
       sorted: nodes,
     });
+  }
+}
+
+export class Antichain extends DirectedAcyclicGraph<MockNode> {
+  constructor(size: number, options?: DirectedAcyclicGraphOptions) {
+    super(options);
+    for (let i = 1; i < size; ++i) {
+      const node = getMockNode();
+      this.add(node);
+    }
   }
 }

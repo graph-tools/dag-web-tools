@@ -1,7 +1,11 @@
 import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
-import { getMockNodes } from '../utils';
+import { getMockNode, getMockNodes } from '../utils';
 import { ForceMap } from '../../utils';
 import { MockNode } from '..';
+import {
+  DirectedAcyclicGraph,
+  DirectedAcyclicGraphOptions,
+} from 'src/DirectedAcyclicGraph';
 
 /**
  * Creates the chain DAG:
@@ -53,5 +57,20 @@ export class ChainMock extends DirectedAcyclicGraphMock<MockNode> {
       size: { nodes: size, edges: size - 1, depth: size - 1, width: 1 },
       sorted: nodes,
     });
+  }
+}
+
+export class Chain extends DirectedAcyclicGraph<MockNode> {
+  constructor(size: number, options?: DirectedAcyclicGraphOptions) {
+    super(options);
+
+    const root = getMockNode();
+    this.add(root);
+
+    for (let i = 1; i < size; ++i) {
+      const node = getMockNode();
+      this.add(node);
+      if (i > 0) this.connect(root, node);
+    }
   }
 }
