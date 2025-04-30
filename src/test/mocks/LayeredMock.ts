@@ -1,7 +1,11 @@
 import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
-import { getMockNodes } from '../utils';
+import { getMockNode, getMockNodes } from '../utils';
 import { ForceMap } from '../../utils';
 import { MockNode } from '..';
+import {
+  DirectedAcyclicGraph,
+  DirectedAcyclicGraphOptions,
+} from 'src/DirectedAcyclicGraph';
 
 function getDescendants(layers: MockNode[][]) {
   const descendants = new ForceMap<MockNode, Set<MockNode>[]>(() => [
@@ -76,5 +80,28 @@ export class LayeredMock extends DirectedAcyclicGraphMock<MockNode> {
       },
       sorted: nodes,
     });
+  }
+}
+
+export class Layered extends DirectedAcyclicGraph<MockNode> {
+  constructor(nodes: number[], options?: DirectedAcyclicGraphOptions) {
+    super(options);
+
+    let layer = [];
+    let previous = [];
+    for (const size of nodes) {
+      previous = layer;
+      layer = [];
+
+      for (let i = 0; i < size; ++i) {
+        this.add(layer[layer.push(getMockNode()) - 1]);
+      }
+
+      for (const tail of previous) {
+        for (const head of layer) {
+          this.connect(tail, head);
+        }
+      }
+    }
   }
 }
