@@ -5,6 +5,7 @@ import { Markers } from '@demo/edges';
 import {
   BreadthFirstIteratorPage,
   DepthFirstIteratorPage,
+  EquivalentNodesPage,
   IndexPage,
   PlanarizationPage,
   TopologicalIteratorPage,
@@ -20,6 +21,7 @@ export const Demo = () => {
           <Route path="/iterator" element={<TopologicalIteratorPage />} />
           <Route path="/iterator/bfs" element={<BreadthFirstIteratorPage />} />
           <Route path="/iterator/dfs" element={<DepthFirstIteratorPage />} />
+          <Route path="/nodes/equivalent" element={<EquivalentNodesPage />} />
           <Route path="/layout/planarization" element={<PlanarizationPage />} />
         </Routes>
       </Router>

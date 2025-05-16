@@ -4,6 +4,7 @@ import { Background, Controls, MarkerType, ReactFlow } from '@xyflow/react';
 import TopsortLogo from '@demo/assets/topsort.svg';
 import DfsLogo from '@demo/assets/dfs.svg';
 import BfsLogo from '@demo/assets/bfs.svg';
+import EquivalentLogo from '@demo/assets/equivalent.svg';
 import PlanarizationLogo from '@demo/assets/planarization.svg';
 
 import { Panel, Navigation } from '@demo/components';
@@ -29,6 +30,11 @@ export const DemoNavigation = ({ className }: { className?: string }) => (
       </Navigation.Item>
       <Navigation.Item logo={BfsLogo} href="/iterator/bfs">
         BFS
+      </Navigation.Item>
+    </Navigation.Group>
+    <Navigation.Group title="Nodes">
+      <Navigation.Item logo={EquivalentLogo} href="/nodes/equivalent">
+        Equivalent
       </Navigation.Item>
     </Navigation.Group>
     <Navigation.Group title="Layouts">
@@ -97,4 +103,5 @@ export const IndexPage = () => {
 export * from './TopologicalIterator';
 export * from './BreadthFirstIterator';
 export * from './DepthFirstIterator';
+export * from './EquivalentNodes';
 export * from './Planarization';
