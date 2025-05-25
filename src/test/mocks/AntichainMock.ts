@@ -1,6 +1,6 @@
 import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
 import { getMockNodes } from '../utils';
-import { MockNode } from '..';
+import { MockEdge, MockNode } from '..';
 
 /**
  * Creates the antichain DAG:
@@ -14,7 +14,10 @@ import { MockNode } from '..';
  *
  * @returns Mock object of the specified DAG.
  */
-export class AntichainMock extends DirectedAcyclicGraphMock<MockNode> {
+export class AntichainMock extends DirectedAcyclicGraphMock<
+  MockNode,
+  MockEdge
+> {
   constructor(size: number) {
     const nodes = getMockNodes(size);
 

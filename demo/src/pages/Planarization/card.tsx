@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 
 import { Card } from '@demo/components';
 import { NodeData, useDAGContext, useGroupContext } from '@demo/contexts';
-import { NodeWithData } from '@demo/hooks';
+import { Identified } from '@demo/hooks';
 
 const GAP = 16;
 const SIZE = 64;
@@ -13,9 +13,7 @@ export const PlanarizationCard = () => {
   const [groupsInstance, groups] = useGroupContext();
 
   const planarize = useCallback(() => {
-    const orderedMultipartite = new OrderedMultipartite<
-      NodeWithData<NodeData>
-    >();
+    const orderedMultipartite = new OrderedMultipartite<Identified<NodeData>>();
 
     let order = 0;
     for (const group of groupsInstance) {

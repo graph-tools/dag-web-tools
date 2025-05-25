@@ -7,17 +7,24 @@ import React, {
   useMemo,
 } from 'react';
 
-import { NodeWithData, useDAG } from '@demo/hooks';
+import { Identified, useDAG } from '@demo/hooks';
 
 import * as T from './types';
 
 export const GroupContext = createContext<
-  [ReturnType<typeof useDAG<T.GroupData>>[0], T.GroupContextActions]
+  [
+    ReturnType<typeof useDAG<T.GroupData, T.GroupEdgeData>>[0],
+    T.GroupContextActions,
+  ]
 >([
-  new DirectedAcyclicGraph<NodeWithData<T.GroupData>>(),
+  new DirectedAcyclicGraph<
+    Identified<T.GroupData>,
+    Identified<T.GroupEdgeData>
+  >(),
   {
     has: () => false,
     node: () => undefined,
+    edge: () => undefined,
     data: () => undefined,
     clear: () => {},
     add: () => '',
@@ -25,6 +32,7 @@ export const GroupContext = createContext<
     replace: () => {},
     connect: () => {},
     disconnect: () => {},
+    replaceEdge: () => {},
     addMember: () => {},
     deleteMember: () => {},
     setMembers: () => new Set<string>(),
@@ -33,7 +41,7 @@ export const GroupContext = createContext<
 ]);
 
 export const GroupProvider = ({ children }: PropsWithChildren) => {
-  const [instance, actions] = useDAG<T.GroupData>();
+  const [instance, actions] = useDAG<T.GroupData, T.GroupEdgeData>();
   useEffect(() => {
     if (instance.size.nodes === 0) {
       actions.add({ position: { x: 0, y: 0 }, data: {} });

@@ -1,16 +1,25 @@
 import { useCallback } from 'react';
-import { Node, OnConnect, OnConnectEnd, useReactFlow } from '@xyflow/react';
+import {
+  Edge,
+  Node,
+  OnConnect,
+  OnConnectEnd,
+  useReactFlow,
+} from '@xyflow/react';
 
 import { useDAG } from './useDirectedAcyclicGraph';
 
 export function useConnectionHandlers(
-  dag: ReturnType<typeof useDAG<Omit<Node, 'id'>>>[1],
+  dag: ReturnType<typeof useDAG<Omit<Node, 'id'>, Omit<Edge, 'id'>>>[1],
 ) {
   const { screenToFlowPosition } = useReactFlow();
 
   const onConnect: OnConnect = useCallback(
     (params) => {
-      dag.connect(params.source, params.target);
+      dag.connect(params.source, params.target, {
+        source: params.source,
+        target: params.target,
+      });
     },
     [dag],
   );
@@ -39,7 +48,7 @@ export function useConnectionHandlers(
             [source, target] = [target, source];
           }
 
-          dag.connect(source, target);
+          dag.connect(source, target, { source, target });
         });
       }
     },

@@ -57,7 +57,7 @@ const enum DepthSearchNodeColor {
 
 export type DepthIteratorItem<Node> = [Node, DepthIteratorDetails];
 
-export class DepthFirstIterator<Node>
+export class DepthFirstIterator<Node, Edge = unknown>
   implements
     Iterator<DepthIteratorItem<Node>>,
     Iterable<DepthIteratorItem<Node>>
@@ -65,7 +65,7 @@ export class DepthFirstIterator<Node>
   /**
    * Contains the `root`'s source graph.
    */
-  private _graph: ReadonlyDirectedAcyclicGraph<Node>;
+  private _graph: ReadonlyDirectedAcyclicGraph<Node, Edge>;
 
   /**
    * Contains specified options.
@@ -86,7 +86,7 @@ export class DepthFirstIterator<Node>
   private shouldYieldOnLeave: boolean;
 
   constructor(
-    graph: ReadonlyDirectedAcyclicGraph<Node>,
+    graph: ReadonlyDirectedAcyclicGraph<Node, Edge>,
     root: Node,
     options?: Partial<DepthIteratorOptions<Node>>,
   ) {

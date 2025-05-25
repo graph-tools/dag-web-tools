@@ -7,10 +7,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { Card, Radio } from '@demo/components';
 import { NodeData, useDAGContext } from '@demo/contexts';
+import { Identified } from '@demo/hooks';
 
 import * as T from './types';
 import S from './index.module.css';
-import { NodeWithData } from '@demo/hooks';
 
 const availableEquivalenceBy = [
   T.EquivalenceBy.PARENTS,
@@ -50,7 +50,7 @@ export const EquivalentNodesCard = () => {
         }
 
         let classNumber = 0;
-        const classified = new Set<Set<NodeWithData<NodeData>>>();
+        const classified = new Set<Set<Identified<NodeData>>>();
         for (const [, cls] of projection.entries()) {
           if (classified.has(cls)) continue;
 

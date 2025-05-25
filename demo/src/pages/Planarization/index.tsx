@@ -4,15 +4,13 @@ import React, { useEffect, useMemo } from 'react';
 import { Background, Controls, Edge, ReactFlow } from '@xyflow/react';
 
 import { Panel } from '@demo/components';
-import { groupNodes, useDAGContext, useGroupContext } from '@demo/contexts';
+import { useDAGContext, useGroupContext } from '@demo/contexts';
 import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
 import {
-  edgeId,
   useChangeHandlers,
   useConnectionHandlers,
   useGroupBehaviour,
   useMerged,
-  useSelection,
 } from '@demo/hooks';
 import { nodeTypes } from '@demo/nodes';
 
@@ -20,54 +18,10 @@ import { PlanarizationCard } from './card';
 
 export const PlanarizationPage = () => {
   const [instance, dag] = useDAGContext();
-  const [selected, onSelectionChange] = useSelection();
   const [groupsInstance, groups] = useGroupContext();
 
   useEffect(() => {
-    dag.clear();
-
-    const a1 = dag.add({ position: { x: 0, y: 0 }, data: {} });
-    const a2 = dag.add({ position: { x: 0, y: 100 }, data: {} });
-    const a = groups.add({
-      position: { x: 0 - 20, y: 0 - 20 },
-      height: 300,
-      data: {},
-    });
-    groups.setMembers(a, new Set([a1, a2]));
-    groupNodes([a1, a2], a, dag);
-
-    const b1 = dag.add({ position: { x: 200, y: 0 }, data: {} });
-    const b2 = dag.add({ position: { x: 200, y: 100 }, data: {} });
-    const b3 = dag.add({ position: { x: 200, y: 200 }, data: {} });
-    const b = groups.add({
-      position: { x: 200 - 20, y: 0 - 20 },
-      height: 300,
-      data: {},
-    });
-    groups.setMembers(b, new Set([b1, b2, b3]));
-    groupNodes([b1, b2, b3], b, dag);
-
-    const c1 = dag.add({ position: { x: 400, y: 0 }, data: {} });
-    const c2 = dag.add({ position: { x: 400, y: 100 }, data: {} });
-    const c = groups.add({
-      position: { x: 400 - 20, y: 0 - 20 },
-      height: 300,
-      data: {},
-    });
-    groups.setMembers(c, new Set([c1, c2]));
-    groupNodes([c1, c2], c, dag);
-
-    groups.connect(a, b);
-    groups.connect(b, c);
-    dag.connect(a1, b2);
-    dag.connect(a2, b1);
-    dag.connect(a2, b3);
-    dag.connect(b1, c2);
-    dag.connect(b2, c2);
-    dag.connect(b3, c1);
-
     return () => {
-      dag.clear();
       groups.clear();
     };
   }, []);
@@ -75,22 +29,19 @@ export const PlanarizationPage = () => {
   const groupedNodes = useMemo(
     () =>
       [...groupsInstance.nodes].map((node) => ({
-        id: node.id,
         ...node.data,
+        id: node.id,
         type: 'Partition',
-        selected: selected.has(node.id),
         zIndex: -1,
       })),
     [groupsInstance],
   );
   const orderEdges = useMemo(
     () =>
-      [...groupsInstance.edges].map(([tail, head]) => ({
-        id: edgeId(tail.id, head.id),
+      [...groupsInstance.edges].map(([, , edge]) => ({
+        ...edge.data,
+        id: edge.id,
         type: 'Default',
-        source: tail.id,
-        target: head.id,
-        selected: selected.has(edgeId(tail.id, head.id)),
       })),
     [groupsInstance],
   );
@@ -110,21 +61,20 @@ export const PlanarizationPage = () => {
   const nodes = useMemo(
     () =>
       [...instance.nodes].map((node) => ({
-        id: node.id,
         ...node.data,
+        id: node.id,
+        type: 'Deletable',
         data: {
           ...node.data.data,
           active: node.data.data.group !== undefined,
           inactive: node.data.data.group === undefined,
         },
-        type: 'Deletable',
-        selected: selected.has(node.id),
       })),
     [instance],
   );
   const edges = useMemo(
     () =>
-      [...instance.edges].reduce((edges, [tail, head]) => {
+      [...instance.edges].reduce((edges, [tail, head, edge]) => {
         const tailGroup = dag.data(tail.id)?.data.group;
         const headGroup = dag.data(head.id)?.data.group;
 
@@ -140,12 +90,11 @@ export const PlanarizationPage = () => {
 
         show &&
           edges.push({
-            id: edgeId(tail.id, head.id),
-            source: tail.id,
-            target: head.id,
+            ...edge.data,
+            id: edge.id,
             type: 'Default',
-            selected: selected.has(edgeId(tail.id, head.id)),
             data: {
+              ...edge.data.data,
               active,
               inactive: !active,
             },
@@ -167,16 +116,11 @@ export const PlanarizationPage = () => {
 
   const onNodesChangeMerged = useMerged(
     onGroupingChangePre,
-    onSelectionChange,
     onNodesChange,
     onGroupsChange,
     onGroupingChangePost,
   );
-  const onEdgesChangeMerged = useMerged(
-    onSelectionChange,
-    onEdgesChange,
-    onOrdersChange,
-  );
+  const onEdgesChangeMerged = useMerged(onEdgesChange, onOrdersChange);
   const onConnectMerged = useMerged(onConnect, onOrder);
   const onConnectEndMerged = useMerged(onConnectEnd, onOrderingEnd);
 

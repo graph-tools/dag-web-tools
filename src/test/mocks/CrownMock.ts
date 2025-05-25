@@ -1,7 +1,8 @@
 import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
-import { getMockNodes } from '../utils';
+import { getMockEdge, getMockNodes } from '../utils';
 import { ForceMap } from '../../utils';
-import { MockNode } from '..';
+import { MockEdge, MockNode } from '..';
+import { DirectedAcyclicGraphEdgeArgs } from 'src/models';
 
 /**
  * Creates the crown DAG:
@@ -19,11 +20,11 @@ import { MockNode } from '..';
  *
  * @returns Mock object of the specified DAG.
  */
-export class CrownMock extends DirectedAcyclicGraphMock<MockNode> {
+export class CrownMock extends DirectedAcyclicGraphMock<MockNode, MockEdge> {
   constructor(size: number) {
     const top = getMockNodes(size);
     const bottom = getMockNodes(size);
-    const edges = new Set<[MockNode, MockNode]>();
+    const edges = new Set<DirectedAcyclicGraphEdgeArgs<MockNode, MockEdge>>();
     const ancestors = new ForceMap<MockNode, Set<MockNode>[]>(() => [
       new Set(),
       new Set(),
@@ -37,7 +38,9 @@ export class CrownMock extends DirectedAcyclicGraphMock<MockNode> {
       const firstChild = bottom[Math.max(0, index - 1)];
       const secondChild = bottom[Math.min(index + 1, size - 1)];
 
-      edges.add([node, firstChild]).add([node, secondChild]);
+      edges
+        .add([node, firstChild, getMockEdge()])
+        .add([node, secondChild, getMockEdge()]);
 
       descendants.forceGet(node)[1].add(firstChild).add(secondChild);
       ancestors.forceGet(firstChild)[1].add(node);

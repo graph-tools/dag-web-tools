@@ -1,16 +1,14 @@
 import { DepthFirstIterator, IteratorInjectOn } from './algo';
+import { EdgeWithActions } from './EdgeWithActions';
 import { CycleProhibitedException } from './exeptions';
 import {
   AbstractDirectedAcyclicGraph,
+  DirectedAcyclicGraphEdgeArgs,
   DirectedAsyclicGraphSize,
   ReadonlyDirectedAcyclicGraph,
 } from './models';
 import { NodeWithActions } from './NodeWithActions';
-import { ForceMap } from './utils';
-
-function getDefaultNodeSet<Node>() {
-  return new Set<Node>();
-}
+import { ForceMap, ReadonlySetView } from './utils';
 
 /**
  * Contains strategies for edge addition.
@@ -30,14 +28,14 @@ export type DirectedAcyclicGraphOptions = {
   edgeAdditionStrategy: EdgeAdditionStrategy;
 };
 
-export class DirectedAcyclicGraphEdgeIterator<Node>
-  implements IterableIterator<[Node, Node]>
+export class DirectedAcyclicGraphEdgeIterator<Node, Edge>
+  implements IterableIterator<DirectedAcyclicGraphEdgeArgs<Node, Edge>>
 {
-  private tail: Node | null = null;
-  private tailIterator: IterableIterator<Node>;
-  private headIterator: IterableIterator<Node>;
+  protected tail: Node | null = null;
+  protected tailIterator: IterableIterator<Node>;
+  protected headIterator: IterableIterator<Node>;
 
-  constructor(private dag: ReadonlyDirectedAcyclicGraph<Node>) {
+  constructor(protected dag: DirectedAcyclicGraph<Node, Edge>) {
     this.tailIterator = dag.nodes;
     this.headIterator = [][Symbol.iterator]();
   }
@@ -46,50 +44,54 @@ export class DirectedAcyclicGraphEdgeIterator<Node>
     return this;
   }
 
-  next(): IteratorResult<[Node, Node]> {
+  next(): IteratorResult<DirectedAcyclicGraphEdgeArgs<Node, Edge>> {
     for (;;) {
-      const { done, value } = this.headIterator.next();
+      const { done, value: head } = this.headIterator.next();
       if (this.tail === null || done) {
-        const { done, value } = this.tailIterator.next();
-        if (done) return { done: true } as IteratorResult<[Node, Node]>;
+        const { done, value: tail } = this.tailIterator.next();
 
-        this.tail = value;
-        this.headIterator = this.dag.childrenOf(this.tail)[Symbol.iterator]();
+        if (done) return { done: true, value: undefined };
+
+        this.tail = tail;
+        this.headIterator = this.dag.childrenOf(tail)[Symbol.iterator]();
       } else {
-        return { done: false, value: [this.tail, value] } as const;
+        return {
+          done: false,
+          value: [this.tail, head, this.dag.edge(this.tail, head)!.data],
+        } as const;
       }
     }
   }
 }
 
-export class DirectedAcyclicGraph<Node>
-  implements AbstractDirectedAcyclicGraph<Node>
+export class DirectedAcyclicGraph<Node, Edge = unknown>
+  implements AbstractDirectedAcyclicGraph<Node, Edge>
 {
-  private _options: DirectedAcyclicGraphOptions;
+  protected _options: DirectedAcyclicGraphOptions;
 
   /**
    * Contains each added node.
    * @internal
    */
-  private _nodes = new Set<Node>();
+  protected _nodes = new Set<Node>();
 
   /**
    * Contains mapping between nodes and its parents.
    * @internal
    */
-  private _parents = new ForceMap<Node, Set<Node>>(getDefaultNodeSet<Node>);
+  protected _parents = new ForceMap<Node, Map<Node, Edge>>(() => new Map());
 
   /**
    * Contains mapping between nodes and its children.
    * @internal
    */
-  private _children = new ForceMap<Node, Set<Node>>(getDefaultNodeSet<Node>);
+  protected _children = new ForceMap<Node, Map<Node, Edge>>(() => new Map());
 
   /**
    * Contains cached values of DAG's sizes.
    * @internal
    */
-  private _size = {
+  protected _size = {
     /**
      * @inheritdoc
      *
@@ -125,21 +127,23 @@ export class DirectedAcyclicGraph<Node>
     width: -1,
   };
 
-  private _sorted: Node[] | null = null;
+  protected _sorted: Node[] | null = null;
 
-  private _sizeMappings: Record<keyof DirectedAsyclicGraphSize, () => number> =
-    {
-      nodes: () => this._nodes.size,
-      edges: () => this._size.edges,
-      depth: () => {
-        if (this._size.depth < 0) this._size.depth = this._depth();
-        return this._size.depth;
-      },
-      width: () => {
-        if (this._size.width < 0) this._size.width = this._width();
-        return this._size.width;
-      },
-    };
+  protected _sizeMappings: Record<
+    keyof DirectedAsyclicGraphSize,
+    () => number
+  > = {
+    nodes: () => this._nodes.size,
+    edges: () => this._size.edges,
+    depth: () => {
+      if (this._size.depth < 0) this._size.depth = this._depth();
+      return this._size.depth;
+    },
+    width: () => {
+      if (this._size.width < 0) this._size.width = this._width();
+      return this._size.width;
+    },
+  };
 
   /**
    * Creates empty DAG.
@@ -158,16 +162,22 @@ export class DirectedAcyclicGraph<Node>
    *
    * @param source - DAG to be source for a new one.
    */
-  static from<Node>(
-    source: ReadonlyDirectedAcyclicGraph<Node>,
+  static from<Node, Edge = unknown>(
+    source: ReadonlyDirectedAcyclicGraph<Node, Edge>,
     options?: DirectedAcyclicGraphOptions,
-  ) {
-    const dag = new DirectedAcyclicGraph<Node>(options);
+  ): DirectedAcyclicGraph<Node, Edge> {
+    const dag = new DirectedAcyclicGraph<Node, Edge>(options);
 
     dag._nodes = new Set(source.nodes);
     for (const node of source.nodes) {
-      dag._parents.set(node, new Set(source.parentsOf(node)));
-      dag._children.set(node, new Set(source.childrenOf(node)));
+      for (const parent of source.parentsOf(node)) {
+        dag._parents
+          .forceGet(node)
+          .set(parent, source.edge(parent, node)!.data);
+      }
+      for (const child of source.childrenOf(node)) {
+        dag._children.forceGet(node).set(child, source.edge(node, child)!.data);
+      }
       dag._size.edges += dag._parents.forceGet(node).size;
     }
 
@@ -180,11 +190,25 @@ export class DirectedAcyclicGraph<Node>
     },
   });
 
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * Time complexity (V8): `O(1)`
+   */
   public get nodes() {
     return this._nodes.values();
   }
 
-  public get edges(): IterableIterator<[Node, Node]> {
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * Time complexity (V8): `O(1)`
+   */
+  public get edges(): IterableIterator<
+    DirectedAcyclicGraphEdgeArgs<Node, Edge>
+  > {
     return new DirectedAcyclicGraphEdgeIterator(this);
   }
 
@@ -246,8 +270,13 @@ export class DirectedAcyclicGraph<Node>
   public delete(node: Node) {
     if (!this._nodes.has(node)) return false;
 
-    this._parents.get(node)?.forEach((parent) => this.disconnect(parent, node));
-    this._children.get(node)?.forEach((child) => this.disconnect(node, child));
+    for (const parent of this.parentsOf(node)) {
+      this.disconnect(parent, node);
+    }
+
+    for (const child of this.childrenOf(node)) {
+      this.disconnect(node, child);
+    }
 
     this._nodes.delete(node);
     this._parents.delete(node);
@@ -265,18 +294,21 @@ export class DirectedAcyclicGraph<Node>
    * * `O(n)`, if the DAG uses safe edge addition strategy, where
    * * `n` - nodes in the affected region (depth first path search).
    */
-  public connect(from: Node, to: Node) {
-    if (this.hasEdge(from, to)) return false;
-    if (this._options.edgeAdditionStrategy === EdgeAdditionStrategy.SAFE) {
-      if (this.hasPathBetween(to, from))
-        throw new CycleProhibitedException(
-          `Adding a designated edge (${from}, ${to}) forms a loop`,
-        );
+  public connect(...args: DirectedAcyclicGraphEdgeArgs<Node, Edge>) {
+    const [tail, head, edge] = args;
+    if (this.hasEdge(tail, head)) return false;
+    if (
+      this._options.edgeAdditionStrategy === EdgeAdditionStrategy.SAFE &&
+      this.hasPathBetween(head, tail)
+    ) {
+      throw new CycleProhibitedException(
+        `Adding a designated edge (${tail}, ${head}) forms a loop`,
+      );
     }
 
-    this._nodes.add(from).add(to);
-    this._children.forceGet(from).add(to);
-    this._parents.forceGet(to).add(from);
+    this._nodes.add(tail).add(head);
+    this._children.forceGet(tail).set(head, edge!);
+    this._parents.forceGet(head).set(tail, edge!);
     ++this._size.edges;
 
     this._size.width = -1;
@@ -291,11 +323,11 @@ export class DirectedAcyclicGraph<Node>
    * @remarks
    * Time complexity (V8): `O(1)`
    */
-  public disconnect(from: Node, to: Node) {
-    if (!this.hasEdge(from, to)) return false;
+  public disconnect(tail: Node, head: Node) {
+    if (!this.hasEdge(tail, head)) return false;
 
-    this._children.get(from)?.delete(to);
-    this._parents.get(to)?.delete(from);
+    this._children.get(tail)?.delete(head);
+    this._parents.get(head)?.delete(tail);
     --this._size.edges;
 
     this._size.width = -1;
@@ -333,7 +365,9 @@ export class DirectedAcyclicGraph<Node>
    */
   public hasPathBetween(tail: Node, head: Node, maxLength: number = +Infinity) {
     if (tail === head) return true;
-    const iterator = new DepthFirstIterator(this, tail, { depth: maxLength });
+    const iterator = new DepthFirstIterator(this, tail, {
+      depth: maxLength,
+    });
 
     for (const [node, details] of iterator) {
       if (details.depth !== 0 && node === head) return true;
@@ -395,7 +429,7 @@ export class DirectedAcyclicGraph<Node>
    * * `n` - number of nodes in the tree affected by the iteration.
    */
   public parentsOf(node: Node): ReadonlySet<Node> {
-    return this._parents.get(node) ?? new Set<Node>();
+    return new ReadonlySetView(this._parents.get(node) ?? new Map());
   }
 
   /**
@@ -406,11 +440,30 @@ export class DirectedAcyclicGraph<Node>
    * * `n` - number of nodes in the tree affected by the iteration.
    */
   public childrenOf(node: Node): ReadonlySet<Node> {
-    return this._children.get(node) ?? new Set<Node>();
+    return new ReadonlySetView(this._children.get(node) ?? new Map());
   }
 
-  public node(node: Node): NodeWithActions<Node> {
-    return new NodeWithActions<Node>(node, this);
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * Time complexity (V8): `O(1)`
+   */
+  public node(node: Node) {
+    return new NodeWithActions<Node, Edge>(node, this);
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * Time complexity (V8): `O(1)`
+   */
+  public edge(tail: Node, head: Node) {
+    if (!this.hasEdge(tail, head)) return undefined;
+    const edge = this._children.get(tail)!.get(head)!;
+
+    return new EdgeWithActions<Node, Edge>([tail, head, edge], this);
   }
 
   /**
@@ -424,7 +477,7 @@ export class DirectedAcyclicGraph<Node>
    * Time complexity (V8): `O(1)`
    */
   public reversed() {
-    const reverse = new DirectedAcyclicGraph<Node>();
+    const reverse = new DirectedAcyclicGraph<Node, Edge>();
 
     reverse._nodes = this._nodes;
     reverse._parents = this._children;
@@ -445,7 +498,7 @@ export class DirectedAcyclicGraph<Node>
       this._sorted = [];
       const visited = new Set<Node>();
 
-      let iterator: DepthFirstIterator<Node>;
+      let iterator: DepthFirstIterator<Node, Edge>;
       for (const node of this._nodes) {
         iterator = new DepthFirstIterator(this, node, {
           ignore: visited,
@@ -461,21 +514,19 @@ export class DirectedAcyclicGraph<Node>
     return this._sorted;
   }
 
-  public validate() {}
-
   /**
    * Calculates depth of the DAG.
    *
    * @internal
    */
-  private _depth() {
+  protected _depth() {
     let depth = 0;
     let currentDepth = 0;
 
     const visited = new Set<Node>();
     const depths = new Map<Node, number>();
 
-    let iterator: DepthFirstIterator<Node>;
+    let iterator: DepthFirstIterator<Node, Edge>;
     for (const node of this._nodes) {
       iterator = new DepthFirstIterator(this, node, {
         ignore: visited,
@@ -509,7 +560,7 @@ export class DirectedAcyclicGraph<Node>
    *
    * @internal
    */
-  private _width() {
+  protected _width() {
     let width = 0;
 
     const nodes = new Set<Node>(this._nodes);
