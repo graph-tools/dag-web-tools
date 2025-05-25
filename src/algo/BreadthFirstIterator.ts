@@ -24,7 +24,7 @@ export type BreadthIteratorItem<Node> = [Node, BreadthIteratorDetails];
 /**
  * Breadth First DAG iterator.
  */
-export class BreadthFirstIterator<Node>
+export class BreadthFirstIterator<Node, Edge = unknown>
   implements
     Iterator<BreadthIteratorItem<Node>>,
     Iterable<BreadthIteratorItem<Node>>
@@ -34,7 +34,7 @@ export class BreadthFirstIterator<Node>
    *
    * @internal
    */
-  private _graph: ReadonlyDirectedAcyclicGraph<Node>;
+  private _graph: ReadonlyDirectedAcyclicGraph<Node, Edge>;
 
   /**
    * Contains specified options.
@@ -79,7 +79,7 @@ export class BreadthFirstIterator<Node>
   private _nextDepthIndex = 1;
 
   constructor(
-    graph: ReadonlyDirectedAcyclicGraph<Node>,
+    graph: ReadonlyDirectedAcyclicGraph<Node, Edge>,
     root: Node,
     options?: Partial<BreadthIteratorOptions<Node>>,
   ) {

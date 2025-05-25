@@ -1,4 +1,9 @@
 import {
+  EdgeWithActionsModel,
+  EdgeWithReadonlyActionsModel,
+} from './EdgeWithActions';
+
+import {
   NodeWithActionsModel,
   NodeWithReadonlyActionsModel,
 } from './NodeWithActions';
@@ -28,7 +33,12 @@ export type DirectedAsyclicGraphSize = {
   width: number;
 };
 
-export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
+export type DirectedAcyclicGraphEdgeArgs<Node, Edge> = [unknown] extends [Edge]
+  ? [tail: Node, head: Node, data?: Edge]
+  : [tail: Node, head: Node, data: Edge];
+
+export interface ReadonlyDirectedAcyclicGraph<Node, Edge = unknown>
+  extends Iterable<Node> {
   /**
    * Topological order iterator.
    */
@@ -47,7 +57,7 @@ export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
   /**
    * Contains all edges of the DAG.
    */
-  edges: IterableIterator<[tail: Node, head: Node]>;
+  edges: IterableIterator<DirectedAcyclicGraphEdgeArgs<Node, Edge>>;
 
   /**
    * Checks if the specified `node` is contained in the DAG.
@@ -124,14 +134,27 @@ export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
    *
    * @returns Node with attached readonly actions.
    */
-  node: (node: Node) => NodeWithReadonlyActionsModel<Node>;
+  node: (node: Node) => NodeWithReadonlyActionsModel<Node, Edge>;
+
+  /**
+   * Attaches shortcuts of DAG's actions for specified node.
+   *
+   * @param tail - Tail of edge.
+   * @param head - Head of edge.
+   *
+   * @returns Edge with attached readonly actions.
+   */
+  edge: (
+    tail: Node,
+    head: Node,
+  ) => EdgeWithReadonlyActionsModel<Node, Edge> | undefined;
 
   /**
    * Creates a new DAG with reversed edges.
    *
-   * @returns Reverse of the DAG.
+   * @returns Readonly reverse of the DAG.
    */
-  reversed: () => ReadonlyDirectedAcyclicGraph<Node>;
+  reversed: () => ReadonlyDirectedAcyclicGraph<Node, Edge>;
 
   /**
    * Sorts nodes in topological order and returns result.
@@ -146,8 +169,8 @@ export interface ReadonlyDirectedAcyclicGraph<Node> extends Iterable<Node> {
  *
  * @typeParam Node - Type of the contained nodes.
  */
-export interface AbstractDirectedAcyclicGraph<Node>
-  extends ReadonlyDirectedAcyclicGraph<Node> {
+export interface AbstractDirectedAcyclicGraph<Node, Edge = unknown>
+  extends ReadonlyDirectedAcyclicGraph<Node, Edge> {
   /**
    * Deletes all nodes and edges.
    */
@@ -176,20 +199,28 @@ export interface AbstractDirectedAcyclicGraph<Node>
    *
    * @param tail - Node to be tail of new edge.
    * @param head - Node to be head of new edge.
+   * @param edge - Data to be associated with new edge.
    *
    * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
    */
-  connect: (tail: Node, heads: Node) => boolean;
+  connect(...args: DirectedAcyclicGraphEdgeArgs<Node, Edge>): boolean;
 
   /**
    * Deletes specified edge (`tail`, `head`).
    *
    * @param tail - Node to be tail of removed edge.
-    @param head - Node to be head of removed edge.
+   * @param head - Node to be head of removed edge.
    *
    * @returns `true` if the edge contained in the DAG, `false` otherwise.
    */
   disconnect: (tail: Node, head: Node) => boolean;
+
+  /**
+   * Creates a new DAG with reversed edges.
+   *
+   * @returns Readonly reverse of the DAG.
+   */
+  reversed: () => AbstractDirectedAcyclicGraph<Node, Edge>;
 
   /**
    * Attaches shortcuts of DAG's actions for specified node.
@@ -198,5 +229,18 @@ export interface AbstractDirectedAcyclicGraph<Node>
    *
    * @returns Node with attached actions.
    */
-  node: (node: Node) => NodeWithActionsModel<Node>;
+  node: (node: Node) => NodeWithActionsModel<Node, Edge>;
+
+  /**
+   * Attaches shortcuts of DAG's actions for specified node.
+   *
+   * @param tail - Tail of edge.
+   * @param head - Head of edge.
+   *
+   * @returns Edge with attached actions.
+   */
+  edge: (
+    tail: Node,
+    head: Node,
+  ) => EdgeWithActionsModel<Node, Edge> | undefined;
 }

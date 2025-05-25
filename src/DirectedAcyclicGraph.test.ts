@@ -1,25 +1,37 @@
 import { describe, expect, test } from 'vitest';
 
+import { DirectedAcyclicGraphEdgeArgs } from '.';
 import {
   DirectedAcyclicGraph,
   EdgeAdditionStrategy,
 } from './DirectedAcyclicGraph';
-import { AntichainMock, ChainMock, CrownMock, LayeredMock } from './test/mocks';
-import { areSetsEqual, getMockNode, getMockNodes } from './test/utils';
-import { DirectedAcyclicGraphMock } from './test/mocks/DirectedAcyclicGraphMock';
-import { MockNode, areMultisetsEqual } from './test';
 
-function edgesEqual(
-  [tailA, headA]: [MockNode, MockNode],
-  [tailB, headB]: [MockNode, MockNode],
+import {
+  DirectedAcyclicGraphMock,
+  AntichainMock,
+  ChainMock,
+  CrownMock,
+  LayeredMock,
+  MockEdge,
+  MockNode,
+  areMultisetsEqual,
+  getMockEdge,
+  areSetsEqual,
+  getMockNode,
+  getMockNodes,
+} from './test';
+
+function edgesEqual<Node, Edge>(
+  [tailA, headA, edgeA]: DirectedAcyclicGraphEdgeArgs<Node, Edge>,
+  [tailB, headB, edgeB]: DirectedAcyclicGraphEdgeArgs<Node, Edge>,
 ): boolean {
-  return tailA === tailB && headA === headB;
+  return tailA === tailB && headA === headB && edgeA === edgeB;
 }
 
 /**
  * Testing is based on three untestable trivial methods `nodes`, `has` and `hasArc`.
  */
-describe(' Directed Acyclic Graph', () => {
+describe('Directed Acyclic Graph', () => {
   const testCases = [
     { title: 'antichain', mock: new AntichainMock(100) },
     { title: 'chain', mock: new ChainMock(100) },
@@ -89,7 +101,7 @@ describe(' Directed Acyclic Graph', () => {
 
       copy.add(tail);
       copy.add(head);
-      copy.connect(tail, head);
+      copy.connect(tail, head, getMockEdge());
 
       expect(areMultisetsEqual([...dag.nodes], [...mock.nodes])).toBeTruthy();
       expect(
@@ -258,7 +270,9 @@ describe(' Directed Acyclic Graph', () => {
       expect(
         areMultisetsEqual(
           [...reversed.edges],
-          [...mock.edges].map((edge) => edge.reverse() as [MockNode, MockNode]),
+          [...mock.edges].map<DirectedAcyclicGraphEdgeArgs<MockNode, MockEdge>>(
+            ([tail, head, edge]) => [head, tail, edge],
+          ),
           {
             equal: edgesEqual,
           },
@@ -326,26 +340,32 @@ describe(' Directed Acyclic Graph', () => {
 
   describe('connecting nodes should works properly', () => {
     test('should connect unconnected nodes', () => {
-      const dag = new DirectedAcyclicGraph<MockNode>();
+      const dag = new DirectedAcyclicGraph<MockNode, MockEdge>();
       const copy = DirectedAcyclicGraph.from(dag);
       const tail = getMockNode();
       const head = getMockNode();
+      const edge = getMockEdge();
 
       /**
        * Method should notify that the edge has been created.
        */
-      expect(dag.connect(tail, head)).toBeTruthy();
+      expect(dag.connect(tail, head, edge)).toBeTruthy();
 
       /**
        * Only specified nodes should be added.
        */
       expect(areMultisetsEqual([...dag.nodes], [tail, head])).toBeTruthy();
 
+      const newEdge: DirectedAcyclicGraphEdgeArgs<MockNode, MockEdge> = [
+        tail,
+        head,
+        edge,
+      ];
       /**
        * Only specified edge should be created.
        */
       expect(
-        areMultisetsEqual([...dag.edges], [[tail, head], ...copy.edges], {
+        areMultisetsEqual([...dag.edges], [newEdge, ...copy.edges], {
           equal: edgesEqual,
         }),
       ).toBeTruthy();
@@ -375,7 +395,7 @@ describe(' Directed Acyclic Graph', () => {
     });
 
     test('should throw CycleProhibitedException when creating loop (SAFE)', () => {
-      const dag = DirectedAcyclicGraph.from(new ChainMock(10), {
+      const dag = DirectedAcyclicGraph.from<MockNode>(new ChainMock(10), {
         edgeAdditionStrategy: EdgeAdditionStrategy.SAFE,
       });
       const nodes = [...dag.nodes];
@@ -396,7 +416,7 @@ describe(' Directed Acyclic Graph', () => {
     });
 
     test('should *not* throw CycleProhibitedException when creating loop (UNSAFE)', () => {
-      const dag = DirectedAcyclicGraph.from(new ChainMock(10), {
+      const dag = DirectedAcyclicGraph.from<MockNode>(new ChainMock(10), {
         edgeAdditionStrategy: EdgeAdditionStrategy.UNSAFE,
       });
       const nodes = [...dag.nodes];
@@ -537,8 +557,8 @@ describe(' Directed Acyclic Graph', () => {
   });
 
   test.skip("should correctly maintain DAG's invariants", () => {
-    let mock: DirectedAcyclicGraphMock<MockNode>;
-    const dag = DirectedAcyclicGraph.from(new AntichainMock(90));
+    let mock: DirectedAcyclicGraphMock<MockNode, MockEdge>;
+    const dag = DirectedAcyclicGraph.from<MockNode>(new AntichainMock(90));
 
     const nodes = getMockNodes(10);
     nodes.forEach((node) => dag.add(node));

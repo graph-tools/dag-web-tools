@@ -1,9 +1,11 @@
 import {
   Node as ReactFlowNode,
   NodeProps as ReactFlowNodeProps,
+  Edge as ReactFlowEdge,
+  EdgeProps as ReactFlowEdgeProps,
 } from '@xyflow/react';
 
-type Data = {
+type Node = {
   /** General */
   loading?: boolean;
   active?: boolean;
@@ -17,6 +19,14 @@ type Data = {
   equivalenceClassNumber?: number;
 };
 
-export type NodeData = Omit<ReactFlowNode<Data>, 'id'>;
+export type NodeData = Omit<ReactFlowNode<Node>, 'id'>;
 
-export type NodeProps = ReactFlowNodeProps<ReactFlowNode<Data>>;
+export type NodeProps = ReactFlowNodeProps<ReactFlowNode<Node>>;
+
+type Edge = {
+  weight?: number;
+};
+
+export type EdgeData = Omit<ReactFlowEdge<Edge>, 'id'>;
+
+export type EdgeProps = ReactFlowEdgeProps<ReactFlowEdge<Edge>>;

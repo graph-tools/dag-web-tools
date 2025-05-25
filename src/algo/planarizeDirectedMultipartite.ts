@@ -1,17 +1,17 @@
 import { AbstractDirectedMultipartite, ReadonlyDirectedAcyclicGraph } from '..';
 
-type IterationOptions<Node> = {
+type IterationOptions<Node, Edge = unknown> = {
   multipartite: AbstractDirectedMultipartite<Node>;
-  source: ReadonlyDirectedAcyclicGraph<Node>;
+  source: ReadonlyDirectedAcyclicGraph<Node, Edge>;
   base: Map<Node, number>;
   ignore?: Set<Node>;
 };
-function iteration<Node>({
+function iteration<Node, Edge = unknown>({
   multipartite,
   source,
   base,
   ignore,
-}: IterationOptions<Node>): Map<Node, number> {
+}: IterationOptions<Node, Edge>): Map<Node, number> {
   const order = new Map<Node, number>();
 
   let parentsCount: number;
@@ -55,9 +55,9 @@ function iteration<Node>({
  *
  * @returns Set of the stable nodes.
  */
-function getStableNodes<Node>(
+function getStableNodes<Node, Edge = unknown>(
   multipartite: AbstractDirectedMultipartite<Node>,
-  source: ReadonlyDirectedAcyclicGraph<Node>,
+  source: ReadonlyDirectedAcyclicGraph<Node, Edge>,
 ): Set<Node> {
   const stable = new Set<Node>();
   const unstable = new Set<Node>();
@@ -101,9 +101,9 @@ const MAX_ITERATION_COUNT = 10;
  *
  * @returns The new order of nodes in each part.
  */
-export function planarizeDirectedMultipartite<Node>(
+export function planarizeDirectedMultipartite<Node, Edge = unknown>(
   multipartite: AbstractDirectedMultipartite<Node>,
-  source: ReadonlyDirectedAcyclicGraph<Node>,
+  source: ReadonlyDirectedAcyclicGraph<Node, Edge>,
   params?: PlanarizationParams,
 ) {
   const {
@@ -145,7 +145,7 @@ export function planarizeDirectedMultipartite<Node>(
       ? getStableNodes(multipartite, source)
       : new Set<Node>();
 
-    const gravityOrder = iteration<Node>({
+    const gravityOrder = iteration<Node, Edge>({
       multipartite: multipartite.revert(),
       source: source.reversed(),
       base: positions,

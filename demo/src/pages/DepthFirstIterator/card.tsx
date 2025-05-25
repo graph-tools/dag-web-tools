@@ -9,12 +9,13 @@ import React, {
 
 import { Card, Radio } from '@demo/components';
 import {
+  EdgeData,
   NodeData,
   getIgnored,
   getRootNode,
   useDAGContext,
 } from '@demo/contexts';
-import { NodeWithData } from '@demo/hooks';
+import { Identified } from '@demo/hooks';
 
 import S from './index.module.css';
 
@@ -31,9 +32,10 @@ export const DepthFirstIteratorCard = () => {
   const [injectOn, setInjectOn] = useState<IteratorInjectOn | undefined>();
   const root = useMemo(() => getRootNode(instance), [instance]);
 
-  const iterator = useRef<DepthFirstIterator<NodeWithData<NodeData>> | null>(
-    null,
-  );
+  const iterator = useRef<DepthFirstIterator<
+    Identified<NodeData>,
+    Identified<EdgeData>
+  > | null>(null);
 
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const iterating = currentNodeId !== null;

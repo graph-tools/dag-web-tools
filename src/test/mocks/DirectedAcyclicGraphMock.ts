@@ -1,20 +1,22 @@
+import { EdgeWithActions } from 'src/EdgeWithActions';
 import { NodeWithActions } from '../..';
 import {
+  DirectedAcyclicGraphEdgeArgs,
   DirectedAsyclicGraphSize,
   ReadonlyDirectedAcyclicGraph,
 } from '../../models/DirectedAcyclicGraph';
 
-export type MockData<Node> = {
+export type MockData<Node, Edge> = {
   nodes: Set<Node>;
-  edges: Set<[Node, Node]>;
+  edges: Set<DirectedAcyclicGraphEdgeArgs<Node, Edge>>;
   ancestors: Map<Node, Set<Node>[]>;
   descendants: Map<Node, Set<Node>[]>;
   size: DirectedAsyclicGraphSize;
   sorted: Node[];
 };
 
-export class DirectedAcyclicGraphMock<Node>
-  implements ReadonlyDirectedAcyclicGraph<Node>
+export class DirectedAcyclicGraphMock<Node, Edge>
+  implements ReadonlyDirectedAcyclicGraph<Node, Edge>
 {
   private _size: DirectedAsyclicGraphSize = {
     nodes: 0,
@@ -23,12 +25,12 @@ export class DirectedAcyclicGraphMock<Node>
     width: 0,
   };
   private _nodes: Set<Node>;
-  private _edges: Set<[Node, Node]>;
+  private _edges: Set<DirectedAcyclicGraphEdgeArgs<Node, Edge>>;
   private _ancestors: Map<Node, Set<Node>[]>;
   private _descendants: Map<Node, Set<Node>[]>;
   private _sorted: Node[];
 
-  constructor(data: MockData<Node>) {
+  constructor(data: MockData<Node, Edge>) {
     this._size = data.size;
     this._nodes = data.nodes;
     this._edges = data.edges;
@@ -49,7 +51,9 @@ export class DirectedAcyclicGraphMock<Node>
     return this._nodes.keys();
   }
 
-  public get edges(): IterableIterator<[Node, Node]> {
+  public get edges(): IterableIterator<
+    DirectedAcyclicGraphEdgeArgs<Node, Edge>
+  > {
     return this._edges.keys();
   }
 
@@ -94,12 +98,20 @@ export class DirectedAcyclicGraphMock<Node>
     return this._descendants.get(parent)?.[1] ?? new Set<Node>();
   }
 
-  public node(node: Node): NodeWithActions<Node> {
+  public node(node: Node): NodeWithActions<Node, Edge> {
     return new NodeWithActions(node, this);
   }
 
+  public edge(tail: Node, head: Node): EdgeWithActions<Node, Edge> | undefined {
+    for (const [edgeTail, edgeHead, edge] of this._edges) {
+      if (edgeTail === tail && edgeHead === head) {
+        return new EdgeWithActions<Node, Edge>([tail, head, edge!], this);
+      }
+    }
+  }
+
   public reversed() {
-    return new DirectedAcyclicGraphMock<Node>({
+    return new DirectedAcyclicGraphMock<Node, Edge>({
       nodes: this._nodes,
       edges: this._edges,
       descendants: this._ancestors,

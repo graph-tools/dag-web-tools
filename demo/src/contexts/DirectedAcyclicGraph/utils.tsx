@@ -1,11 +1,16 @@
 import { ReadonlyDirectedAcyclicGraph } from '@self/dag';
-import { DirectedAcyclicGraphActions, NodeWithData } from '@demo/hooks';
+import { DirectedAcyclicGraphActions, Identified } from '@demo/hooks';
 
 import * as T from './types';
 
+type Instance = ReadonlyDirectedAcyclicGraph<
+  Identified<T.NodeData>,
+  Identified<T.EdgeData>
+>;
+
 export function getNode(
-  instance: ReadonlyDirectedAcyclicGraph<NodeWithData<T.NodeData>>,
-  predicate: (node: NodeWithData<T.NodeData>) => boolean,
+  instance: Instance,
+  predicate: (node: Identified<T.NodeData>) => boolean,
 ) {
   for (const node of instance.nodes) {
     if (predicate(node)) return node;
@@ -14,8 +19,8 @@ export function getNode(
 }
 
 export function getNodes(
-  instance: ReadonlyDirectedAcyclicGraph<NodeWithData<T.NodeData>>,
-  predicate: (node: NodeWithData<T.NodeData>) => boolean,
+  instance: Instance,
+  predicate: (node: Identified<T.NodeData>) => boolean,
 ) {
   const nodes = [];
   for (const node of instance.nodes) {
@@ -24,22 +29,18 @@ export function getNodes(
   return nodes;
 }
 
-export function getRootNode(
-  instance: ReadonlyDirectedAcyclicGraph<NodeWithData<T.NodeData>>,
-) {
+export function getRootNode(instance: Instance) {
   return getNode(instance, (node) => node.data.data.root === true);
 }
 
-export function getIgnored(
-  instance: ReadonlyDirectedAcyclicGraph<NodeWithData<T.NodeData>>,
-) {
+export function getIgnored(instance: Instance) {
   return getNodes(instance, (node) => node.data.data.ignored === true);
 }
 
 export function groupNodes(
   nodes: Iterable<string>,
   group: string,
-  dag: DirectedAcyclicGraphActions<T.NodeData>,
+  dag: DirectedAcyclicGraphActions<T.NodeData, T.EdgeData>,
 ) {
   dag.batch(() => {
     for (const node of nodes) {
@@ -53,7 +54,7 @@ export function groupNodes(
 
 export function ungroupNodes(
   nodes: Iterable<string>,
-  dag: DirectedAcyclicGraphActions<T.NodeData>,
+  dag: DirectedAcyclicGraphActions<T.NodeData, T.EdgeData>,
 ) {
   dag.batch(() => {
     for (const node of nodes) {

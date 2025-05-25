@@ -1,4 +1,4 @@
-import { MockNode } from '.';
+import { MockEdge, MockNode } from '.';
 
 export function getMockNode(): MockNode {
   return {};
@@ -8,6 +8,10 @@ export function getMockNodes(count: number): MockNode[] {
   const nodes: MockNode[] = [];
   for (let i = 0; i < count; ++i) nodes.push(getMockNode());
   return nodes;
+}
+
+export function getMockEdge(): MockEdge {
+  return {};
 }
 
 type EqualOptions<T> = {

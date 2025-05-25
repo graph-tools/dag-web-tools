@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Card } from '@demo/components';
 import { NodeData, useDAGContext } from '@demo/contexts';
-import { NodeWithData } from '@demo/hooks';
+import { Identified } from '@demo/hooks';
 
 export const TopologicalIteratorCard = () => {
   const [instance, dag] = useDAGContext();
 
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  const iterator = useRef<Iterator<NodeWithData<NodeData>> | null>(null);
+  const iterator = useRef<Iterator<Identified<NodeData>> | null>(null);
   const iterating = currentNodeId !== null;
 
   const iterate = useCallback(

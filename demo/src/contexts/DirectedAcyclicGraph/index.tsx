@@ -6,17 +6,18 @@ import React, {
   useEffect,
 } from 'react';
 
-import { NodeWithData, useDAG } from '@demo/hooks';
+import { Identified, useDAG } from '@demo/hooks';
 
 import * as T from './types';
 
 export const DirectedAcyclicGraphContext = createContext<
-  ReturnType<typeof useDAG<T.NodeData>>
+  ReturnType<typeof useDAG<T.NodeData, T.EdgeData>>
 >([
-  new DirectedAcyclicGraph<NodeWithData<T.NodeData>>(),
+  new DirectedAcyclicGraph<Identified<T.NodeData>, Identified<T.EdgeData>>(),
   {
     has: () => false,
     node: () => undefined,
+    edge: () => undefined,
     data: () => undefined,
     clear: () => {},
     add: () => '',
@@ -24,6 +25,7 @@ export const DirectedAcyclicGraphContext = createContext<
     replace: () => {},
     connect: () => {},
     disconnect: () => {},
+    replaceEdge: () => {},
     batch: () => {},
   },
 ]);
@@ -31,7 +33,8 @@ export const DirectedAcyclicGraphContext = createContext<
 export const DirectedAcyclicGraphProvider = ({
   children,
 }: PropsWithChildren) => {
-  const [instance, actions] = useDAG<T.NodeData>();
+  const [instance, actions] = useDAG<T.NodeData, T.EdgeData>();
+
   useEffect(() => {
     if (instance.size.nodes === 0) {
       actions.add({ position: { x: 0, y: 0 }, data: {} });
