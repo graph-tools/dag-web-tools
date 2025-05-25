@@ -26,9 +26,12 @@ export const DemoNavigation = ({ className }: { className?: string }) => (
         BFS
       </Navigation.Item>
     </Navigation.Group>
-    <Navigation.Group title="Nodes">
-      <Navigation.Item logo={EquivalentLogo} href="/nodes/equivalent">
+    <Navigation.Group title="Groupings">
+      <Navigation.Item logo={EquivalentLogo} href="/groupings/equivalent">
         Equivalent
+      </Navigation.Item>
+      <Navigation.Item logo={EquivalentLogo} href="/groupings/leiden">
+        Leiden
       </Navigation.Item>
     </Navigation.Group>
     <Navigation.Group title="Layouts">
@@ -91,4 +94,5 @@ export * from './TopologicalIterator';
 export * from './BreadthFirstIterator';
 export * from './DepthFirstIterator';
 export * from './EquivalentNodes';
+export * from './Leiden';
 export * from './Planarization';

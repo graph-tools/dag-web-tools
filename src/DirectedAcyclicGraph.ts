@@ -1,4 +1,7 @@
-import { DepthFirstIterator, IteratorInjectOn } from './algo';
+import {
+  DepthFirstIterator,
+  IteratorInjectOn,
+} from './algo/DepthFirstIterator';
 import { EdgeWithActions } from './EdgeWithActions';
 import { CycleProhibitedException } from './exeptions';
 import {
