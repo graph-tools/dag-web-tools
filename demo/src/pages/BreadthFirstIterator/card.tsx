@@ -8,8 +8,14 @@ import React, {
 } from 'react';
 
 import { Card } from '@demo/components';
-import { getIgnored, getRootNode, useDAGContext, NodeData } from '@demo/contexts';
-import { NodeWithData } from '@demo/hooks';
+import {
+  getIgnored,
+  getRootNode,
+  useDAGContext,
+  NodeData,
+  EdgeData,
+} from '@demo/contexts';
+import { Identified } from '@demo/hooks';
 
 export const BreadthFirstIteratorCard = () => {
   const [instance, dag] = useDAGContext();
@@ -18,9 +24,10 @@ export const BreadthFirstIteratorCard = () => {
   const [depth, setDepth] = useState<number | undefined>();
 
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  const iterator = useRef<BreadthFirstIterator<NodeWithData<NodeData>> | null>(
-    null,
-  );
+  const iterator = useRef<BreadthFirstIterator<
+    Identified<NodeData>,
+    Identified<EdgeData>
+  > | null>(null);
   const iterating = currentNodeId !== null;
 
   const iterate = useCallback(

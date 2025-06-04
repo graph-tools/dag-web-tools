@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import {
   applyNodeChanges,
+  Edge,
   Node,
   OnEdgesChange,
   OnNodesChange,
@@ -9,7 +10,7 @@ import {
 import { parseEdgeId, useDAG } from './useDirectedAcyclicGraph';
 
 export function useChangeHandlers(
-  dag: ReturnType<typeof useDAG<Omit<Node, 'id'>>>[1],
+  dag: ReturnType<typeof useDAG<Omit<Node, 'id'>, Omit<Edge, 'id'>>>[1],
 ) {
   const onNodesChange: OnNodesChange = useCallback(
     (changes) =>
@@ -30,7 +31,11 @@ export function useChangeHandlers(
             case 'add':
               dag.add(change.item);
               break;
-            case 'replace':
+            case 'select':
+              dag.replace(change.id, (data) => ({
+                ...data,
+                selected: change.selected,
+              }));
               break;
           }
         });
@@ -44,11 +49,16 @@ export function useChangeHandlers(
         changes.forEach((change) => {
           switch (change.type) {
             case 'add':
-              dag.connect(change.item.source, change.item.target);
+              dag.connect(change.item.source, change.item.target, change.item);
               break;
             case 'remove':
               dag.disconnect(...parseEdgeId(change.id));
               break;
+            case 'select':
+              dag.replaceEdge(change.id, (data) => ({
+                ...data,
+                selected: change.selected,
+              }));
           }
         });
       }),

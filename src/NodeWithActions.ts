@@ -1,7 +1,14 @@
-import { AbstractDirectedAcyclicGraph, NodeWithActionsModel } from './models';
+import {
+  AbstractDirectedAcyclicGraph,
+  ConnectFromArgs,
+  ConnectToArgs,
+  NodeWithActionsModel,
+} from './models';
 import { ProxyReadonlySet } from './utils';
 
-export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
+export class NodeWithActions<Node, Edge = unknown>
+  implements NodeWithActionsModel<Node, Edge>
+{
   constructor(
     /**
      * @inheritdoc
@@ -13,7 +20,7 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
      *
      * @internal
      */
-    protected source: AbstractDirectedAcyclicGraph<Node>,
+    protected source: AbstractDirectedAcyclicGraph<Node, Edge>,
   ) {}
 
   /**
@@ -21,14 +28,13 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `parentsOf(node)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.parentsOf}
    *
    * @see {@link DirectedAcyclicGraph.parentsOf|parentsOf interface} for more information.
    */
-  public get parents(): ReadonlySet<this> {
-    return new ProxyReadonlySet<this, Node>(
+  public get parents(): ReadonlySet<NodeWithActionsModel<Node, Edge>> {
+    return new ProxyReadonlySet<NodeWithActionsModel<Node, Edge>, Node>(
       this.source.parentsOf(this.node),
-      (node) => this.source.node(node) as this,
+      (node) => this.source.node(node),
       (nodeWithAction) => nodeWithAction.node,
     );
   }
@@ -38,14 +44,13 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `childrenOf(node)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.childrenOf}
    *
    * @see {@link DirectedAcyclicGraph.childrenOf|childrenOf interface} for more information.
    */
-  public get children(): ReadonlySet<this> {
-    return new ProxyReadonlySet<this, Node>(
+  public get children(): ReadonlySet<NodeWithActionsModel<Node, Edge>> {
+    return new ProxyReadonlySet<NodeWithActionsModel<Node, Edge>, Node>(
       this.source.childrenOf(this.node),
-      (node) => this.source.node(node) as this,
+      (node) => this.source.node(node),
       (nodeWithAction) => nodeWithAction.node,
     );
   }
@@ -55,14 +60,13 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `ancestorsOf(node, maxDepth)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.ancestorsOf}
    *
    * @see {@link DirectedAcyclicGraph.ancestorsOf|ancestorsOf interface} for more information.
    */
-  public ancestors(maxDepth: number = +Infinity): ReadonlySet<this> {
-    return new ProxyReadonlySet<this, Node>(
+  public ancestors(maxDepth: number = +Infinity) {
+    return new ProxyReadonlySet<NodeWithActionsModel<Node, Edge>, Node>(
       this.source.ancestorsOf(this.node, maxDepth),
-      (node) => this.source.node(node) as this,
+      (node) => this.source.node(node),
       (nodeWithAction) => nodeWithAction.node,
     );
   }
@@ -72,14 +76,13 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `descendantsOf(node, maxDepth)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.descendantsOf}
    *
    * @see {@link DirectedAcyclicGraph.descendantsOf|descendantOf interface} for more information.
    */
-  public descendants(maxDepth: number = +Infinity): ReadonlySet<this> {
-    return new ProxyReadonlySet<this, Node>(
+  public descendants(maxDepth: number = +Infinity) {
+    return new ProxyReadonlySet<NodeWithActionsModel<Node, Edge>, Node>(
       this.source.descendantsOf(this.node, maxDepth),
-      (node) => this.source.node(node) as this,
+      (node) => this.source.node(node),
       (nodeWithAction) => nodeWithAction.node,
     );
   }
@@ -89,7 +92,6 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * To find the relationship, the `hasPathBetween(node, descendant, maxDepth)` of the source structure is used.
-   * {@inheritDoc DirectedAcyclicGraph.hasPathBetween}
    *
    * @see {@link DirectedAcyclicGraph.hasPathBetween|hasPathBetween interface} for more information.
    */
@@ -102,7 +104,6 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * To find the relationship, the `hasPathBetween(ancestor, node, maxDepth)` of the source structure is used.
-   * {@inheritDoc DirectedAcyclicGraph.hasPathBetween}
    *
    * @see {@link DirectedAcyclicGraph.hasPathBetween|hasPathBetween interface} for more information.
    */
@@ -110,12 +111,28 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
     return this.source.hasPathBetween(this.node, ancestor, maxDepth);
   }
 
-  public isChildOf(node: Node) {
-    return this.source.hasPathBetween(this.node, node, 1);
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * This method is just a shortcut to call `hasPathBetween(parent, node, 1)` on the source structure.
+   *
+   * @see {@link DirectedAcyclicGraph.hasPathBetween|hasPathBetween interface} for more information.
+   */
+  public isChildOf(parent: Node) {
+    return this.source.hasPathBetween(parent, this.node, 1);
   }
 
-  public isParentOf(node: Node) {
-    return this.source.hasPathBetween(node, this.node, 1);
+  /**
+   * @inheritdoc
+   *
+   * @remarks
+   * This method is just a shortcut to call `hasPathBetween(node, child, 1)` on the source structure.
+   *
+   * @see {@link DirectedAcyclicGraph.hasPathBetween|hasPathBetween interface} for more information.
+   */
+  public isParentOf(child: Node) {
+    return this.source.hasPathBetween(this.node, child, 1);
   }
 
   /**
@@ -123,12 +140,11 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `connect(node, head)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.connect}
    *
    * @see {@link DirectedAcyclicGraph.connect|connect interface} for more information.
    */
-  public connectTo(head: Node) {
-    return this.source.connect(this.node, head);
+  public connectTo(...[head, data]: ConnectToArgs<Node, Edge>) {
+    return this.source.connect(this.node, head, data!);
   }
 
   /**
@@ -136,12 +152,11 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `connect(tail, node)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.connect}
    *
    * @see {@link DirectedAcyclicGraph.connect|connect interface} for more information.
    */
-  public connectFrom(tail: Node) {
-    return this.source.connect(tail, this.node);
+  public connectFrom(...[tail, data]: ConnectFromArgs<Node, Edge>): boolean {
+    return this.source.connect(tail, this.node, data!);
   }
 
   /**
@@ -149,7 +164,6 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `disconnect(node, head)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.disconnect}
    *
    * @see {@link DirectedAcyclicGraph.disconnect|disconnect interface} for more information.
    */
@@ -162,7 +176,6 @@ export class NodeWithActions<Node> implements NodeWithActionsModel<Node> {
    *
    * @remarks
    * This method is just a shortcut to call `disconnect(tail, node)` on the source structure.
-   * {@inheritDoc DirectedAcyclicGraph.disconnect}
    *
    * @see {@link DirectedAcyclicGraph.disconnect|disconnect interface} for more information.
    */

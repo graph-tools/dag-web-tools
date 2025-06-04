@@ -2,13 +2,7 @@ import React, { useMemo } from 'react';
 import { Background, Controls, MarkerType, ReactFlow } from '@xyflow/react';
 
 import { Panel } from '@demo/components';
-import {
-  edgeId,
-  useSelection,
-  useChangeHandlers,
-  useConnectionHandlers,
-  useMerged,
-} from '@demo/hooks';
+import { useChangeHandlers, useConnectionHandlers } from '@demo/hooks';
 import { useDAGContext } from '@demo/contexts';
 import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
 import { nodeTypes } from '@demo/nodes';
@@ -16,37 +10,29 @@ import { nodeTypes } from '@demo/nodes';
 import { BreadthFirstIteratorCard } from './card';
 
 export const BreadthFirstIteratorPage = () => {
-  const [selected, onSelectionChange] = useSelection();
-
   const [instance, dag] = useDAGContext();
   const nodes = useMemo(
     () =>
       [...instance.nodes].map((node) => ({
-        id: node.id,
         ...node.data,
+        id: node.id,
         type: 'AnyFirstIterator',
-        selected: selected.has(node.id),
       })),
-    [instance, selected],
+    [instance],
   );
   const edges = useMemo(
     () =>
-      [...instance.edges].map(([tail, head]) => ({
-        id: edgeId(tail.id, head.id),
+      [...instance.edges].map(([, , edge]) => ({
+        ...edge.data,
+        id: edge.id,
         type: 'Default',
-        source: tail.id,
-        target: head.id,
-        selected: selected.has(edgeId(tail.id, head.id)),
         markerEnd: { type: MarkerType.Arrow },
       })),
-    [instance, selected],
+    [instance],
   );
 
   const [onNodesChange, onEdgesChange] = useChangeHandlers(dag);
   const [onConnect, onConnectEnd] = useConnectionHandlers(dag);
-
-  const onNodesChangeMerged = useMerged(onSelectionChange, onNodesChange);
-  const onEdgesChangeMerged = useMerged(onSelectionChange, onEdgesChange);
 
   return (
     <ReactFlow
@@ -54,8 +40,8 @@ export const BreadthFirstIteratorPage = () => {
       edges={edges}
       onConnect={onConnect}
       onConnectEnd={onConnectEnd}
-      onNodesChange={onNodesChangeMerged}
-      onEdgesChange={onEdgesChangeMerged}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
       connectionLineComponent={DefaultConnectionLine}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}

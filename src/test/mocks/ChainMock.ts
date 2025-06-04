@@ -1,7 +1,11 @@
-import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
-import { getMockNodes } from '../utils';
+import { DirectedAcyclicGraphEdgeArgs } from 'src/models';
+
+import { getMockEdge, getMockNodes } from '../utils';
 import { ForceMap } from '../../utils';
-import { MockNode } from '..';
+
+import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
+
+import { MockEdge, MockNode } from '..';
 
 /**
  * Creates the chain DAG:
@@ -15,16 +19,16 @@ import { MockNode } from '..';
  *
  * @returns Mock object of the specified DAG.
  */
-export class ChainMock extends DirectedAcyclicGraphMock<MockNode> {
+export class ChainMock extends DirectedAcyclicGraphMock<MockNode, MockEdge> {
   constructor(size: number) {
     const nodes = getMockNodes(size);
-    const edges = new Set<[MockNode, MockNode]>();
+    const edges = new Set<DirectedAcyclicGraphEdgeArgs<MockNode, MockEdge>>();
     const ancestors = new ForceMap<MockNode, Set<MockNode>[]>(() => []);
     const descendants = new ForceMap<MockNode, Set<MockNode>[]>(() => []);
 
     nodes.forEach((node, index) => {
       if (index !== 0) {
-        edges.add([nodes[index - 1], node]);
+        edges.add([nodes[index - 1], node, getMockEdge()]);
       }
     });
 

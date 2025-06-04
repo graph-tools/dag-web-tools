@@ -1,7 +1,8 @@
 import { DirectedAcyclicGraphMock } from './DirectedAcyclicGraphMock';
-import { getMockNodes } from '../utils';
+import { getMockEdge, getMockNodes } from '../utils';
 import { ForceMap } from '../../utils';
-import { MockNode } from '..';
+import { MockEdge, MockNode } from '..';
+import { DirectedAcyclicGraphEdgeArgs } from 'src/models';
 
 function getDescendants(layers: MockNode[][]) {
   const descendants = new ForceMap<MockNode, Set<MockNode>[]>(() => [
@@ -42,17 +43,19 @@ function getDescendants(layers: MockNode[][]) {
  *
  * @returns Mock object of the specified DAG.
  */
-export class LayeredMock extends DirectedAcyclicGraphMock<MockNode> {
+export class LayeredMock extends DirectedAcyclicGraphMock<MockNode, MockEdge> {
   constructor(size: number[]) {
     const layers: MockNode[][] = [];
     size.forEach((layer) => layers.push(getMockNodes(layer)));
 
-    const edges = new Set<[MockNode, MockNode]>();
+    const edges = new Set<DirectedAcyclicGraphEdgeArgs<MockNode, MockEdge>>();
     layers.forEach(
       (layer, index) =>
         index + 1 < layers.length &&
         layer.forEach((tail) =>
-          layers[index + 1].forEach((head) => edges.add([tail, head])),
+          layers[index + 1].forEach((head) =>
+            edges.add([tail, head, getMockEdge()]),
+          ),
         ),
     );
 

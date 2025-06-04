@@ -1,0 +1,25 @@
+.toolbar {
+  position: absolute;
+  pointer-events: all;
+  z-index: 999;
+}
+
+.edge {
+  stroke: gray !important;
+
+  &.selected {
+    stroke: black !important;
+  }
+
+  &.active {
+    stroke: blue !important;
+  }
+
+  &.inactive {
+    stroke: lightgray !important;
+  }
+}
+
+.weight {
+  width: 64px;
+}

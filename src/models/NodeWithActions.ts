@@ -1,9 +1,17 @@
+export type ConnectToArgs<Node, Edge> = [unknown] extends [Edge]
+  ? [head: Node, data?: Edge]
+  : [head: Node, data: Edge];
+
+export type ConnectFromArgs<Node, Edge> = [unknown] extends [Edge]
+  ? [tail: Node, data?: Edge]
+  : [tail: Node, data: Edge];
+
 /**
  * Describes the general behavior of nodes with attached *readonly* actions.
  *
  * @typeParam Node - Type of the contained node.
  */
-export interface NodeWithReadonlyActionsModel<Node> {
+export interface NodeWithReadonlyActionsModel<Node, Edge = unknown> {
   /**
    * Contains node.
    */
@@ -12,12 +20,12 @@ export interface NodeWithReadonlyActionsModel<Node> {
   /**
    * Contains parents of the node.
    */
-  readonly parents: ReadonlySet<this>;
+  readonly parents: ReadonlySet<NodeWithReadonlyActionsModel<Node, Edge>>;
 
   /**
    * Contains children of the node.
    */
-  readonly children: ReadonlySet<this>;
+  readonly children: ReadonlySet<NodeWithReadonlyActionsModel<Node, Edge>>;
 
   /**
    * Searches ancestors of the node that are no deeper than `maxDepth`.
@@ -26,7 +34,9 @@ export interface NodeWithReadonlyActionsModel<Node> {
    *
    * @returns Ancecestors of the node.
    */
-  ancestors: (maxDepth: number) => ReadonlySet<this>;
+  ancestors: (
+    maxDepth: number,
+  ) => ReadonlySet<NodeWithReadonlyActionsModel<Node, Edge>>;
 
   /**
    * Searches descendants of the node that are no deeper than `maxDepth`.
@@ -35,7 +45,9 @@ export interface NodeWithReadonlyActionsModel<Node> {
    *
    * @returns Descendants of the node.
    */
-  descendants: (maxDepth: number) => ReadonlySet<this>;
+  descendants: (
+    maxDepth: number,
+  ) => ReadonlySet<NodeWithReadonlyActionsModel<Node, Edge>>;
 
   /**
    * Checks if the node is the child of `parent`.
@@ -81,8 +93,32 @@ export interface NodeWithReadonlyActionsModel<Node> {
  *
  * @typeParam Node - Type of the contained node.
  */
-export interface NodeWithActionsModel<Node>
-  extends NodeWithReadonlyActionsModel<Node> {
+export interface NodeWithActionsModel<Node, Edge = unknown>
+  extends NodeWithReadonlyActionsModel<Node, Edge> {
+  /**
+   * @inheritdoc
+   */
+  readonly parents: ReadonlySet<NodeWithActionsModel<Node, Edge>>;
+
+  /**
+   * @inheritdoc
+   */
+  readonly children: ReadonlySet<NodeWithActionsModel<Node, Edge>>;
+
+  /**
+   * @inheritdoc
+   */
+  ancestors: (
+    maxDepth: number,
+  ) => ReadonlySet<NodeWithActionsModel<Node, Edge>>;
+
+  /**
+   * @inheritdoc
+   */
+  descendants: (
+    maxDepth: number,
+  ) => ReadonlySet<NodeWithActionsModel<Node, Edge>>;
+
   /**
    * Creates specified edge (`node`, `head`).
    *
@@ -90,7 +126,7 @@ export interface NodeWithActionsModel<Node>
    *
    * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
    */
-  connectTo: (head: Node) => boolean;
+  connectTo: (...[head, data]: ConnectToArgs<Node, Edge>) => boolean;
 
   /**
    * Creates specified edge (`node`, `head`).
@@ -99,7 +135,7 @@ export interface NodeWithActionsModel<Node>
    *
    * @returns `true` if the edge *did not* contain in the DAG, `false` otherwise.
    */
-  connectFrom: (tail: Node) => boolean;
+  connectFrom: (...[tail, data]: ConnectFromArgs<Node, Edge>) => boolean;
 
   /**
    * Deletes specified edge (`node`, `head`).

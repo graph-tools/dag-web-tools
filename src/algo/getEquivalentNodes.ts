@@ -15,8 +15,8 @@ import { ForceMap, Trie } from '../utils';
  * * `n` - number of nodes in the DAG
  * * `e` - number of edges in the DAG.
  */
-export function getEquivalentNodesByParents<Node>(
-  dag: ReadonlyDirectedAcyclicGraph<Node>,
+export function getEquivalentNodesByParents<Node, Edge = unknown>(
+  dag: ReadonlyDirectedAcyclicGraph<Node, Edge>,
   nodes: Set<Node>,
 ) {
   const projection = new Map<Node, Set<Node>>();
@@ -56,8 +56,8 @@ export function getEquivalentNodesByParents<Node>(
  * * `n` - number of nodes in the DAG
  * * `e` - number of edges in the DAG.
  */
-export function getEquivalentNodesByChildren<Node>(
-  dag: ReadonlyDirectedAcyclicGraph<Node>,
+export function getEquivalentNodesByChildren<Node, Edge = unknown>(
+  dag: ReadonlyDirectedAcyclicGraph<Node, Edge>,
   nodes: Set<Node>,
 ) {
   return getEquivalentNodesByParents(dag.reversed(), nodes);
@@ -77,8 +77,8 @@ export function getEquivalentNodesByChildren<Node>(
  * * `n` - number of nodes in the DAG
  * * `e` - number of edges in the DAG.
  */
-export function getEquivalentNodes<Node>(
-  dag: ReadonlyDirectedAcyclicGraph<Node>,
+export function getEquivalentNodes<Node, Edge = unknown>(
+  dag: ReadonlyDirectedAcyclicGraph<Node, Edge>,
   nodes: Set<Node>,
 ) {
   const projection = new Map<Node, Set<Node>>();

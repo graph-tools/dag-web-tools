@@ -5,7 +5,7 @@ export class ForceMap<K, V> extends Map<K, V> {
   /**
    * Contains getter of default value.
    */
-  _getDefault: () => V;
+  protected _getDefault: (key: K) => V;
 
   /**
    * Creates ForceMap.
@@ -13,7 +13,7 @@ export class ForceMap<K, V> extends Map<K, V> {
    * @param getDefault - Function to be generator of default value.
    * @param iterable - Iterable object to be passed into map's constructor.
    */
-  constructor(getDefault: () => V, iterable?: Iterable<[K, V]>) {
+  constructor(getDefault: (key: K) => V, iterable?: Iterable<[K, V]>) {
     super(iterable);
     this._getDefault = getDefault;
   }
@@ -26,7 +26,7 @@ export class ForceMap<K, V> extends Map<K, V> {
    * @returns Value associated with the `key` if it exists, default value otherwise.
    */
   forceGet(key: K): V {
-    if (!this.has(key)) this.set(key, this._getDefault());
+    if (!this.has(key)) this.set(key, this._getDefault(key));
     return this.get(key)!;
   }
 }

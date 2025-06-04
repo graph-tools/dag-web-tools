@@ -223,7 +223,7 @@ describe('Depth First Iterator', () => {
   });
 
   test('should throw CycleProhibitedException when a cycle is found', () => {
-    const dag = DirectedAcyclicGraph.from(new ChainMock(10), {
+    const dag = DirectedAcyclicGraph.from<MockNode>(new ChainMock(10), {
       edgeAdditionStrategy: EdgeAdditionStrategy.UNSAFE,
     });
     const nodes = [...dag.nodes];

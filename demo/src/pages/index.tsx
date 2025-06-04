@@ -10,13 +10,7 @@ import PlanarizationLogo from '@demo/assets/planarization.svg';
 import { Panel, Navigation } from '@demo/components';
 import { useDAGContext } from '@demo/contexts';
 import { DefaultConnectionLine, edgeTypes } from '@demo/edges';
-import {
-  edgeId,
-  useChangeHandlers,
-  useConnectionHandlers,
-  useMerged,
-  useSelection,
-} from '@demo/hooks';
+import { useChangeHandlers, useConnectionHandlers } from '@demo/hooks';
 import { nodeTypes } from '@demo/nodes';
 
 export const DemoNavigation = ({ className }: { className?: string }) => (
@@ -32,9 +26,12 @@ export const DemoNavigation = ({ className }: { className?: string }) => (
         BFS
       </Navigation.Item>
     </Navigation.Group>
-    <Navigation.Group title="Nodes">
-      <Navigation.Item logo={EquivalentLogo} href="/nodes/equivalent">
+    <Navigation.Group title="Groupings">
+      <Navigation.Item logo={EquivalentLogo} href="/groupings/equivalent">
         Equivalent
+      </Navigation.Item>
+      <Navigation.Item logo={EquivalentLogo} href="/groupings/leiden">
+        Leiden
       </Navigation.Item>
     </Navigation.Group>
     <Navigation.Group title="Layouts">
@@ -46,27 +43,23 @@ export const DemoNavigation = ({ className }: { className?: string }) => (
 );
 
 export const IndexPage = () => {
-  const [selected, onSelectionChange] = useSelection();
   const [instance, dag] = useDAGContext();
   const nodes = useMemo(
     () =>
       [...instance.nodes].map((node) => ({
-        id: node.id,
         ...node.data,
+        id: node.id,
         type: 'Deletable',
-        selected: selected.has(node.id),
       })),
     [instance],
   );
   const edges = useMemo(
     () =>
-      [...instance.edges].map(([tail, head]) => ({
-        id: edgeId(tail.id, head.id),
+      [...instance.edges].map(([, , edge]) => ({
+        ...edge.data,
+        id: edge.id,
         type: 'Default',
-        source: tail.id,
-        target: head.id,
         markerEnd: { type: MarkerType.Arrow },
-        selected: selected.has(edgeId(tail.id, head.id)),
       })),
     [instance],
   );
@@ -74,17 +67,14 @@ export const IndexPage = () => {
   const [onNodesChange, onEdgesChange] = useChangeHandlers(dag);
   const [onConnect, onConnectEnd] = useConnectionHandlers(dag);
 
-  const onNodesChangeMerged = useMerged(onSelectionChange, onNodesChange);
-  const onEdgesChangeMerged = useMerged(onSelectionChange, onEdgesChange);
-
   return (
     <ReactFlow
       nodes={nodes}
       edges={edges}
       onConnect={onConnect}
       onConnectEnd={onConnectEnd}
-      onNodesChange={onNodesChangeMerged}
-      onEdgesChange={onEdgesChangeMerged}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
       connectionLineComponent={DefaultConnectionLine}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
@@ -104,4 +94,5 @@ export * from './TopologicalIterator';
 export * from './BreadthFirstIterator';
 export * from './DepthFirstIterator';
 export * from './EquivalentNodes';
+export * from './Leiden';
 export * from './Planarization';
