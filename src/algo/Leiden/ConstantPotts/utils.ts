@@ -1,5 +1,5 @@
 import {
-  NonIsomorphicPartitionError,
+  NonIsomorphicPartitionsError,
   UnmatchedPartitionError,
 } from '../../../exeptions';
 import { ReadonlyPartition } from '../../../models';
@@ -50,13 +50,13 @@ export function copyData<Node>(
 
     for (node of part) {
       if (!(nodeData = base.data.get(node)))
-        throw new NonIsomorphicPartitionError();
+        throw new NonIsomorphicPartitionsError();
       data.set(node, { ...nodeData });
     }
 
     if (node) {
       if (!(partData = base.data.get(part)))
-        throw new NonIsomorphicPartitionError();
+        throw new NonIsomorphicPartitionsError();
       data.set(dest.get(node)!, { ...partData });
     }
   }

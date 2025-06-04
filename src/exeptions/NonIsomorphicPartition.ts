@@ -1,5 +1,5 @@
-export class NonIsomorphicPartitionError extends Error {
+export class NonIsomorphicPartitionsError extends Error {
   constructor() {
-    super('Partition are not isomorphic.');
+    super('Partitions are not isomorphic.');
   }
 }
